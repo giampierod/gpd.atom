@@ -1,0 +1,70 @@
+{
+  '.source.GPD':{
+    'boilerplate':{
+      'prefix':'///'
+      'body':'//Today//\n//End//\n\n//Todo//\n    ${1:Todo} ${0}\n//End//\n\n//Closed//\n//End//'
+    }
+    'cost':{
+      'prefix': '$'
+      'body': '\$($1) $0'
+    }
+    'completion_time':{
+      'prefix': '~'
+      'body': '~(${1:date}) $0'
+    }
+    'context':{
+      'prefix': '@'
+      'body': '@(${1:Some_Context}) $0'
+    }
+    'note':{
+      'prefix': '`'
+      'body': '`($0)'
+    }
+    'project':{
+      'prefix':'#'
+      'body': '#(${1:Some_Project}) $0'
+    }
+    'section_header':{
+      'prefix': '//'
+      'body':'//${1:Some Title}//\n$0\n//End//'
+    }
+    'target':{
+      'prefix': '!'
+      'body': '!(${1:Some_Target}) $0'
+    }
+  }
+  '.source.GPD_Note':{
+    'boilerplate':{
+      'prefix':'///'
+      'body':'//Today//\n//End//\n\n//Todo//\n    ${1:Todo} ${0}\n//End//\n\n//Closed//\n//End//'
+    }
+    'cost':{
+      'prefix': '$'
+      'body': '\$($1) $0'
+    }
+    'completion_time':{
+      'prefix': '~'
+      'body': '~(${1:date}) $0'
+    }
+    'context':{
+      'prefix': '@'
+      'body': '@(${1:Some_Context}) $0'
+    }
+    'note':{
+      'prefix': '`'
+      'body': '`($0)'
+    }
+    'project':{
+      'prefix':'#'
+      'body': '#(${1:Some_Project}) $0'
+    }
+    'section_header':{
+      'prefix': '//'
+      'body':'//${1:Some Title}//\n$0\n//End//'
+    }
+    'target':{
+      'prefix': '!'
+      'body': '!(${1:Some_Target}) $0'
+    }
+  }
+}

@@ -1,0 +1,45 @@
+'scopeName': 'source.GPD_Note'
+'name': 'GPD_Note'
+'comment': 'GPD productivity'
+'fileTypes': [
+  'GPD_Note'
+]
+'foldingStartmarker':'//(?!End)[\\w\\d\\s]*//'
+'foldingStopMarker': '//End//'
+'patterns': [
+  {
+    'begin': '#\\('
+    'end': '\\)'
+    'name': 'entity.other.inherited-class'
+  }
+  {
+    'begin': '@\\('
+    'end': '\\)'
+    'name': 'support.class'
+  }
+  {
+    'begin': '!\\('
+    'end': '\\)'
+    'name': 'variable.parameter'
+  }
+  {
+    'begin':'~\\('
+    'end':'\\)'
+    'name':'storage.type'
+  }
+  {
+    'begin':'\\$\\('
+    'end':'\\)'
+    'name':'constant.numeric'
+  }
+  {
+    'begin':'\\`\\('
+    'end':'\\)'
+    'name':'comment'
+  }
+  {
+    'begin':'//'
+    'end':'//'
+    'name':'comment'
+  }
+]

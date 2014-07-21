@@ -1,0 +1,33 @@
+{
+  "name": "gpd",
+  "version": "0.0.1",
+  "main":"./lib/todos",
+  "private": true,
+  "description": "GPD productivity system for Atom.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/giampierod/gpd-atom"
+  },
+  "license": "MIT",
+  "engines": {
+    "atom": ">0.50.0"
+  },
+  "activationEvents": [
+    "select-todo",
+    "done-todo",
+    "done-todo-and-repeat",
+    "toggle-note"
+  ],
+  "dependencies":{
+    "underscore-plus":"1.x",
+    "moment":"2.x"
+  },
+  "_comment":{
+    "readme": "",
+    "readmeFilename": "README.md",
+    "bugs": {
+      "url": ""
+    },
+    "homepage": ""
+  }
+}

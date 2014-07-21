@@ -1,0 +1,5 @@
+'.editor':
+  'ctrl->':'select-todo'
+  'ctrl-k ctrl-,':'toggle-note'
+  'ctrl-shift-down':'done-todo'
+  'ctrl-shift-up':'done-todo-and-repeat'
