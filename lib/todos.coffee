@@ -148,29 +148,29 @@ module.exports =
   # Fold the other notes, and unfold the selected not so the user can focus
   # on the note they are working on.
   highlight_note: (note_range) ->
+    console.log("Called Highlight Note")
+    console.log("Higlight from: " + note_range.start + " to: " + note_range.end)
     editor = atom.workspace.getActiveEditor()
-    editor.setSelectedBufferRanges(new Range ([0,0], [note_range.start.row, 0]), new Range(note_range.end, editor.getEofBufferPosition()))
+    before_note = new Range([0, 0], [note_range.start.row, 0])
+    after_note = new Range(note_range.end, editor.getEofBufferPosition())
+    editor.setSelectedBufferRanges([before_note, after_note])
     editor.foldSelectedLines()
 
 
   # Find a note with the given header_text in the view
   find_note_header: (header_text) ->
     editor = atom.workspace.getActiveEditor()
+    me = @
     editor.unfoldAll()
-    results = editor.scanInBufferRange new RegExp("//" + header_text + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
-      console.log("note header found")
+    editor.scanInBufferRange new RegExp("//" + header_text + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
       result.stop()
       editor.scanInBufferRange new RegExp("//End//", 'g'), [result.range.end,editor.getEofBufferPosition()], (footer_result) ->
-        console.log("note footer found")
         footer_result.stop()
-        console.log("start: " + result.range.start)
-        console.log("end: " + footer_result.range.end)
         note_range = new Range(result.range.start,footer_result.range.end)
-        console.log("Note Range End Row: " + note_range.end)
+        me.highlight_note(note_range)
         editor.setCursorBufferPosition([note_range.end.row-1, 0])
-        @highlight_note(note_range)
-        console.log("Just called highlight note")
-    return results.length > 0
+        editor.moveCursorToEndOfLine()
+        return true
 
   note_exists: (text) ->
     note_regex = new RegExp(note_header_pattern, 'g')
