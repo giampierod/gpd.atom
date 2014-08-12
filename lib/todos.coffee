@@ -166,7 +166,7 @@ module.exports =
         console.log("start: " + result.range.start)
         console.log("end: " + footer_result.range.end)
         note_range = [result.range.start,footer_result.range.end]
-        console.log("Note Range End Row: " + note_range.end.row)
+        console.log("Note Range End Row: " + note_range.end)
         editor.setCursorBufferPosition([note_range.end.row-2, 0])
         @highlight_note(note_range)
         console.log("Just called highlight note")
