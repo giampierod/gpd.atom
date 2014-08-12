@@ -165,8 +165,9 @@ module.exports =
         footer_result.stop()
         note_range = [result.start,footer_result.end]
         editor.setCursorBufferPosition([note_range.end.row-2, 0])
-        console.log(note_range)
+        console.log(note_range)        
         @highlight_note(note_range)
+        console.log("Just called highlight note")
     return results.length > 0
 
   note_exists: (text) ->
