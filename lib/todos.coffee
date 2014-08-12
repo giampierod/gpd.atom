@@ -149,7 +149,7 @@ module.exports =
   # on the note they are working on.
   highlight_note: (note_range) ->
     editor = atom.workspace.getActiveEditor()
-    editor.setSelectedBufferRanges(new Range ([0,0],[note_range.start.row, 0]), new Range(note_range.end, editor.getEofBufferPosition()))
+    editor.setSelectedBufferRanges(new Range ([0,0], [note_range.start.row, 0]), new Range(note_range.end, editor.getEofBufferPosition()))
     editor.foldSelectedLines()
 
 
