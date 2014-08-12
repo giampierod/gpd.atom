@@ -159,9 +159,8 @@ module.exports =
     editor.unfoldAll()
     results = editor.scanInBufferRange new RegExp("//" + header_text + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
       console.log("note header found")
-      result.stop()
-      editor.setCursorBufferPosition(result.range.start)
-      editor.scanInBufferRange new RegExp("//End//", 'g'), [result.end,editor.getEofBufferPosition()], (footer_result) ->
+      result.stop()      
+      editor.scanInBufferRange new RegExp("//End//", 'g'), [result.range.end,editor.getEofBufferPosition()], (footer_result) ->
         console.log("note footer found")
         footer_result.stop()
         console.log("start: " + result.range.start)
