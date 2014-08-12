@@ -163,9 +163,11 @@ module.exports =
       editor.scanInBufferRange new RegExp("//End//", 'g'), [result.end,editor.getEofBufferPosition()], (footer_result) ->
         console.log("note footer found")
         footer_result.stop()
+        console.log("start: " + result.start)
+        console.log("end: " + footer_result.start)
         note_range = [result.start,footer_result.end]
-        editor.setCursorBufferPosition([note_range.end.row-2, 0])
-        console.log(note_range)        
+        console.log(note_range)
+        editor.setCursorBufferPosition([note_range.end.row-2, 0])        
         @highlight_note(note_range)
         console.log("Just called highlight note")
     return results.length > 0
