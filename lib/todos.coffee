@@ -149,7 +149,7 @@ module.exports =
   # on the note they are working on.
   highlight_note: (note_range) ->
     editor = atom.workspace.getActiveEditor()
-    editor.setSelectedBufferRanges([[[0,0],[note_range.start.row, 0]], [note_range.end, editor.getEofBufferPosition()]])
+    editor.setSelectedBufferRanges(new Range ([0,0],[note_range.start.row, 0]), new Range(note_range.end, editor.getEofBufferPosition()))
     editor.foldSelectedLines()
 
 
@@ -167,7 +167,7 @@ module.exports =
         console.log("end: " + footer_result.range.end)
         note_range = new Range(result.range.start,footer_result.range.end)
         console.log("Note Range End Row: " + note_range.end)
-        editor.setCursorBufferPosition([note_range.end.row-2, 0])
+        editor.setCursorBufferPosition([note_range.end.row-1, 0])
         @highlight_note(note_range)
         console.log("Just called highlight note")
     return results.length > 0
