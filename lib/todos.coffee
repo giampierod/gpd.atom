@@ -158,8 +158,10 @@ module.exports =
     editor = atom.workspace.getActiveEditor()
     editor.unfoldAll()
     results = editor.scanInBufferRange new RegExp("//" + header_text + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
+      console.log("note header found")
       result.stop()
       editor.scanInBufferRange new RegExp("//End//", 'g'), [result.end,editor.getEofBufferPosition()], (footer_result) ->
+        console.log("note footer found")
         footer_result.stop()
         note_range = [result.start,footer_result.end]
         editor.setCursorBufferPosition([note_range.end.row-2, 0])
