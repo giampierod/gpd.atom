@@ -1,5 +1,5 @@
 {
-  "name": "GPD",
+  "name": "gpd",
   "version": "0.9.1",
   "main": "./lib/todos",
   "private": true,
