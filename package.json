@@ -1,6 +1,6 @@
 {
   "name": "gpd",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "main": "./lib/todos",
   "private": true,
   "description": "GPD productivity system for Atom.",
@@ -13,6 +13,7 @@
     "atom": ">0.50.0"
   },
   "activationEvents": [
+    "new-todo",
     "select-todo",
     "done-todo",
     "done-todo-and-repeat",

@@ -16,10 +16,6 @@ module.exports =
     ]
 
   activate: ->
-    atom.workspaceView.command 'new-todo', =>
-      console.log("Adding new-todo command")
-      @new_todo()
-
     atom.workspaceView.command 'select-todo', =>
       @select_todo()
 
@@ -36,6 +32,11 @@ module.exports =
           @open_todo()
         else if editor.getGrammar().scopeName == 'source.GPD'
           @open_note()
+
+    atom.workspaceView.command 'new-todo', =>
+      @new_todo()
+
+
 
   select_todo: ->
     editor = atom.workspace.getActiveEditor()
