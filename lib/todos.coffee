@@ -16,6 +16,10 @@ module.exports =
     ]
 
   activate: ->
+    atom.workspaceView.command 'new-todo', =>
+      console.log("Adding new-todo command")
+      @new_todo()
+
     atom.workspaceView.command 'select-todo', =>
       @select_todo()
 
@@ -33,6 +37,8 @@ module.exports =
         else if editor.getGrammar().scopeName == 'source.GPD'
           @open_note()
 
+
+
   select_todo: ->
     editor = atom.workspace.getActiveEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
@@ -45,6 +51,13 @@ module.exports =
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
       if !@close_todo()
+        editor.abortTransaction()
+
+  new_todo: ->
+    editor = atom.workspace.getActiveEditor()
+    return unless editor.getGrammar().scopeName == 'source.GPD'
+    editor.transact =>
+      if !@create_todo()
         editor.abortTransaction()
 
   done_todo_and_repeat: ->
@@ -91,6 +104,27 @@ module.exports =
       editor.setCursorBufferPosition(cur_line)
       return false
 
+  create_todo: ->
+    console.log("Creating todo")
+    editor = atom.workspace.getActiveEditor()
+    cur_line = editor.getCursorBufferPosition()
+    todo = '    '
+    range = [[0,0], editor.getEofBufferPosition()]
+    header_regex = _.escapeRegExp(todo_header_string)
+    editor.scanInBufferRange new RegExp(header_regex, 'g'), range, (result) ->
+      result.stop()
+      footer_regex = _.escapeRegExp(footer_string)
+      range = [result.range.end, editor.getEofBufferPosition()]
+      editor.scanInBufferRange new RegExp(footer_regex, 'g'), range, (footer_result) ->
+        footer_result.stop()
+        editor.setCursorBufferPosition(footer_result.range.start)
+        editor.moveCursorLeft()
+        editor.insertNewline()
+        editor.moveCursorToBeginningOfLine()
+        editor.insertText('    ')
+    return true
+
+
   add_to_todo: ->
     editor = atom.workspace.getActiveEditor()
     cur_line = editor.getCursorBufferPosition()
@@ -111,8 +145,8 @@ module.exports =
           editor.moveCursorLeft()
           editor.insertNewline()
           editor.moveCursorToBeginningOfLine()
-          todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '')
-          todo = todo.replace(/(^\s+|\s+$)/g,'')
+          todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
+          todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
           editor.insertText('    ')
           editor.insertText(todo)
           paste_line = editor.getCursorBufferPosition()
