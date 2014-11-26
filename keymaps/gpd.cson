@@ -1,6 +1,6 @@
 '.editor':
-  'ctrl->':'select-todo'
+  'ctrl-?':'new-todo'
+  'ctrl-.':'select-todo'
   'ctrl-,':'toggle-note'
-  'ctrl-M':'new-todo'
-  'ctrl-]':'done-todo'
-  'ctrl-[':'done-todo-and-repeat'
+  'ctrl-}':'done-todo'
+  'ctrl-{':'done-todo-and-repeat'

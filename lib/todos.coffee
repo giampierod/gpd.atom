@@ -37,8 +37,6 @@ module.exports =
         else if editor.getGrammar().scopeName == 'source.GPD'
           @open_note()
 
-
-
   select_todo: ->
     editor = atom.workspace.getActiveEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
