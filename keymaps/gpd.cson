@@ -17,16 +17,8 @@ Filename: keymaps/gpd.cson
 Description:
   Shortcut key combinations for all commands for gpd.atom."""
 '.atom-text-editor':
-<<<<<<< HEAD
   'ctrl-?':'gpd.atom:new-todo'
   'ctrl-.':'gpd.atom:select-todo'
   'ctrl-,':'gpd.atom:toggle-note'
   'ctrl-}':'gpd.atom:done-todo'
   'ctrl-{':'gpd.atom:done-todo-and-repeat'
-=======
-  'ctrl-_':'new-todo'
-  'ctrl->':'select-todo'
-  'ctrl-k ctrl-,':'toggle-note'
-  'ctrl-}':'done-todo'
-  'ctrl-{':'done-todo-and-repeat'
->>>>>>> 9671cc972c73ed5cbef52eee4371138a5e08df5b
