@@ -16,20 +16,19 @@ module.exports =
     ]
 
   activate: ->
-    atom.workspaceView.command 'new-todo', =>
-      console.log("Adding new-todo command")
+    atom.commands.add 'atom-workspace', 'gpd.atom:new-todo', =>
       @new_todo()
 
-    atom.workspaceView.command 'select-todo', =>
+    atom.commands.add 'atom-workspace', 'gpd.atom:select-todo', =>
       @select_todo()
 
-    atom.workspaceView.command 'done-todo', =>
+    atom.commands.add 'atom-workspace', 'gpd.atom:done-todo', =>
       @done_todo()
 
-    atom.workspaceView.command 'done-todo-and-repeat', =>
+    atom.commands.add 'atom-workspace', 'gpd.atom:done-todo-and-repeat', =>
       @done_todo_and_repeat()
 
-    atom.workspaceView.command 'toggle-note', =>
+    atom.commands.add 'atom-workspace', 'gpd.atom:toggle-note', =>
       editor = atom.workspace.getActiveEditor()
       editor.transact =>
         if editor.getGrammar().scopeName == 'source.GPD_Note'
