@@ -16,7 +16,7 @@ limitations under the License.
 Filename: keymaps/gpd.cson
 Description:
   Shortcut key combinations for all commands for gpd.atom."""
-'.editor':
+'.atom-text-editor':
 <<<<<<< HEAD
   'ctrl-?':'gpd.atom:new-todo'
   'ctrl-.':'gpd.atom:select-todo'
