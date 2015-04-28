@@ -1,3 +1,23 @@
+###
+Copyright 2014 Giampiero De Ciantis
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Filename: /lib/todos.coffee
+Description:
+  All logic for commands in gpd.atom. These commands can create, move, complete,
+  and repeat GPD todos. Also commands for toggling the Notes view.
+###
 _ = require 'underscore-plus'
 {Range} = require 'atom'
 moment = require 'moment'
@@ -16,10 +36,14 @@ module.exports =
     ]
 
   activate: ->
+<<<<<<< HEAD
     atom.commands.add 'atom-workspace', 'gpd.atom:new-todo', =>
       @new_todo()
 
     atom.commands.add 'atom-workspace', 'gpd.atom:select-todo', =>
+=======
+    atom.workspaceView.command 'select-todo', =>
+>>>>>>> 9671cc972c73ed5cbef52eee4371138a5e08df5b
       @select_todo()
 
     atom.commands.add 'atom-workspace', 'gpd.atom:done-todo', =>
@@ -35,6 +59,11 @@ module.exports =
           @open_todo()
         else if editor.getGrammar().scopeName == 'source.GPD'
           @open_note()
+
+    atom.workspaceView.command 'new-todo', =>
+      @new_todo()
+
+
 
   select_todo: ->
     editor = atom.workspace.getActiveEditor()

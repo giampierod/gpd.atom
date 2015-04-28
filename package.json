@@ -1,6 +1,6 @@
 {
   "name": "gpd",
-  "version": "0.9.4",
+  "version": "0.9.8",
   "main": "./lib/todos",
   "private": true,
   "description": "GPD productivity system for Atom.",
@@ -8,11 +8,12 @@
     "type": "git",
     "url": "https://github.com/giampierod/gpd.atom"
   },
-  "license": "MIT",
+  "license": "Apache-2.0",
   "engines": {
     "atom": ">0.50.0"
   },
   "activationEvents": [
+    "new-todo",
     "select-todo",
     "done-todo",
     "done-todo-and-repeat",

@@ -1,6 +1,32 @@
+'_license':"""
+Copyright 2014 Giampiero De Ciantis
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
+Filename: keymaps/gpd.cson
+Description:
+  Shortcut key combinations for all commands for gpd.atom."""
 '.editor':
+<<<<<<< HEAD
   'ctrl-?':'gpd.atom:new-todo'
   'ctrl-.':'gpd.atom:select-todo'
   'ctrl-,':'gpd.atom:toggle-note'
   'ctrl-}':'gpd.atom:done-todo'
   'ctrl-{':'gpd.atom:done-todo-and-repeat'
+=======
+  'ctrl-_':'new-todo'
+  'ctrl->':'select-todo'
+  'ctrl-k ctrl-,':'toggle-note'
+  'ctrl-}':'done-todo'
+  'ctrl-{':'done-todo-and-repeat'
+>>>>>>> 9671cc972c73ed5cbef52eee4371138a5e08df5b
