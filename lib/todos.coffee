@@ -36,15 +36,12 @@ module.exports =
     ]
 
   activate: ->
-<<<<<<< HEAD
     atom.commands.add 'atom-workspace', 'gpd.atom:new-todo', =>
       @new_todo()
 
     atom.commands.add 'atom-workspace', 'gpd.atom:select-todo', =>
-=======
-    atom.workspaceView.command 'select-todo', =>
->>>>>>> 9671cc972c73ed5cbef52eee4371138a5e08df5b
       @select_todo()
+
 
     atom.commands.add 'atom-workspace', 'gpd.atom:done-todo', =>
       @done_todo()
