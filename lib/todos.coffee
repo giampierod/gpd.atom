@@ -19,7 +19,7 @@ Description:
   and repeat GPD todos. Also commands for toggling the Notes view.
 ###
 _ = require 'underscore-plus'
-{Range} = require 'atom'
+{CompositeDisposable} = require 'atom'
 moment = require 'moment'
 
 todo_header_string = '//Todo//'
@@ -35,56 +35,46 @@ module.exports =
       'source.GPD_Note'
     ]
 
-  activate: ->
-    atom.commands.add 'atom-workspace', 'gpd.atom:new-todo', =>
-      @new_todo()
+  activate: (state) ->
+    @subscriptions = new CompositeDisposable
 
-    atom.commands.add 'atom-workspace', 'gpd.atom:select-todo', =>
-      @select_todo()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:new-todo': => @new_todo()
 
-
-    atom.commands.add 'atom-workspace', 'gpd.atom:done-todo', =>
-      @done_todo()
-
-    atom.commands.add 'atom-workspace', 'gpd.atom:done-todo-and-repeat', =>
-      @done_todo_and_repeat()
-
-    atom.commands.add 'atom-workspace', 'gpd.atom:toggle-note', =>
-      editor = atom.workspace.getActiveEditor()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:select-todo': => @select_todo()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:done-todo': => @done_todo()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:done-todo-and-repeat': => @done_todo_and_repeat()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:toggle-note': =>
+      editor = atom.workspace.getActiveTextEditor()
       editor.transact =>
         if editor.getGrammar().scopeName == 'source.GPD_Note'
           @open_todo()
         else if editor.getGrammar().scopeName == 'source.GPD'
           @open_note()
 
-    atom.workspaceView.command 'new-todo', =>
-      @new_todo()
-
-
 
   select_todo: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
       if !@move_todo_to_section('Today')
         editor.abortTransaction()
 
   done_todo: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
       if !@close_todo()
         editor.abortTransaction()
 
   new_todo: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
       if !@create_todo()
         editor.abortTransaction()
 
   done_todo_and_repeat: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
       if !@add_to_todo() || !@close_todo()
@@ -95,9 +85,9 @@ module.exports =
     header_pattern.test(text)
 
   move_todo_to_section: (section, prefix) ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     cur_line = editor.getCursorBufferPosition()
-    editor.moveCursorToEndOfLine()
+    editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
     editor.setSelectedBufferRange([[cur_line.row,0],end_of_line])
     todo = editor.getSelectedText()
@@ -129,7 +119,7 @@ module.exports =
 
   create_todo: ->
     console.log("Creating todo")
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     cur_line = editor.getCursorBufferPosition()
     todo = '    '
     range = [[0,0], editor.getEofBufferPosition()]
@@ -149,9 +139,9 @@ module.exports =
 
 
   add_to_todo: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     cur_line = editor.getCursorBufferPosition()
-    editor.moveCursorToEndOfLine()
+    editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
     editor.setSelectedBufferRange([[cur_line.row,0],end_of_line])
     todo = editor.getSelectedText()
@@ -193,7 +183,7 @@ module.exports =
     note_header = "//" + note_time + "//\n"
     note_footer = "//End//\n\n"
     note_boiler_str = (note_header + "    " + todo_str + "\n\n    \n"+ note_footer)
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     editor.unfoldAll()
     note_boiler_range = editor.getBuffer().insert([0,0], note_boiler_str)
     @highlight_note(note_boiler_range)
@@ -207,7 +197,7 @@ module.exports =
   highlight_note: (note_range) ->
     console.log("Called Highlight Note")
     console.log("Higlight from: " + note_range.start + " to: " + note_range.end)
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     before_note = new Range([0, 0], [note_range.start.row, 0])
     after_note = new Range(note_range.end, editor.getEofBufferPosition())
     editor.setSelectedBufferRanges([before_note, after_note])
@@ -216,7 +206,7 @@ module.exports =
 
   # Find a note with the given header_text in the view
   find_note_header: (header_text) ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     me = @
     editor.unfoldAll()
     editor.scanInBufferRange new RegExp("//" + header_text + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
@@ -226,7 +216,7 @@ module.exports =
         note_range = new Range(result.range.start,footer_result.range.end)
         me.highlight_note(note_range)
         editor.setCursorBufferPosition([note_range.end.row-1, 0])
-        editor.moveCursorToEndOfLine()
+        editor.moveToEndOfLine()
         return true
 
   note_exists: (text) ->
@@ -234,21 +224,21 @@ module.exports =
     if text.match(note_regex) then return note_regex.exec(text)[0] else return false
 
   open_note_file: ->
-    filename = atom.workspace.getActiveEditor().getBuffer().getUri() + "_Note"
+    filename = atom.workspace.getActiveTextEditor().getBuffer().getUri() + "_Note"
     return atom.workspace.open(filename)
 
 
   open_todo: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     editor.transact ->
-      filename = atom.workspace.getActiveEditor().getBuffer().getUri().replace('.GPD_Note','.GPD')
+      filename = atom.workspace.getActiveTextEditor().getBuffer().getUri().replace('.GPD_Note','.GPD')
       return atom.workspace.open(filename)
 
   open_note: ->
-    editor = atom.workspace.getActiveEditor()
+    editor = atom.workspace.getActiveTextEditor()
     cur_pos = editor.getCursorBufferPosition()
     note_time =  moment().format("YYYY.MM.DD.hh.mm")
-    editor.moveCursorToEndOfLine()
+    editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
     editor.selectToBeginningOfLine()
     todo_str = editor.getSelectedText().trim()
@@ -263,7 +253,7 @@ module.exports =
           if !@find_note_header(inner_note)
             @create_note(inner_note, todo_str_min)
       else
-        editor.moveCursorToEndOfLine()
+        editor.moveToEndOfLine()
         editor.insertText(" `(" + note_time + ")")
         @open_note_file().then =>
           @create_note(note_time, todo_str)

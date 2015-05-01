@@ -12,13 +12,15 @@
   "engines": {
     "atom": ">0.50.0"
   },
-  "activationEvents": [
-    "new-todo",
-    "select-todo",
-    "done-todo",
-    "done-todo-and-repeat",
-    "toggle-note"
-  ],
+  "activationCommands": {
+    "atom-workspace": [
+      "gpd.atom:new-todo",
+      "gpd.atom:select-todo",
+      "gpd.atom:done-todo",
+      "gpd.atom:done-todo-and-repeat",
+      "gpd.atom:toggle-note"
+    ]
+  },
   "dependencies": {
     "underscore-plus": "1.x",
     "moment": "2.x"
