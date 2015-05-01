@@ -101,8 +101,8 @@ module.exports =
         result.stop()
         editor.setCursorBufferPosition(result.range.end)
         editor.insertNewline()
-        editor.moveCursorToBeginningOfLine()
-        editor.insertText('    ')
+        editor.moveToBeginningOfLine()
+        editor.insertText('  ')
         if typeof prefix != 'undefined'
           editor.insertText(prefix)
         editor.insertText(todo)
@@ -121,7 +121,6 @@ module.exports =
     console.log("Creating todo")
     editor = atom.workspace.getActiveTextEditor()
     cur_line = editor.getCursorBufferPosition()
-    todo = '    '
     range = [[0,0], editor.getEofBufferPosition()]
     header_regex = _.escapeRegExp(todo_header_string)
     editor.scanInBufferRange new RegExp(header_regex, 'g'), range, (result) ->
@@ -133,8 +132,8 @@ module.exports =
         editor.setCursorBufferPosition(footer_result.range.start)
         editor.moveCursorLeft()
         editor.insertNewline()
-        editor.moveCursorToBeginningOfLine()
-        editor.insertText('    ')
+        editor.moveToBeginningOfLine()
+        editor.insertText('  ')
     return true
 
 
@@ -157,10 +156,10 @@ module.exports =
           editor.setCursorBufferPosition(footer_result.range.start)
           editor.moveCursorLeft()
           editor.insertNewline()
-          editor.moveCursorToBeginningOfLine()
+          editor.moveToBeginningOfLine()
           todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
           todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-          editor.insertText('    ')
+          editor.insertText('  ')
           editor.insertText(todo)
           paste_line = editor.getCursorBufferPosition()
           if paste_line.row < cur_line.row
