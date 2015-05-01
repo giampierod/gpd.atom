@@ -23,7 +23,7 @@ Description:
   'gpd',
   'GPD'
 ]
-'foldingStartmarker':'//(?!End)[\\w\\d\\s]*//'
+'foldingStartMarker':'//(?!End)[\\w\\d\\s]*//'
 'foldingStopMarker': '//End//'
 'patterns': [
   {

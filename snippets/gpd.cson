@@ -52,10 +52,6 @@ Description:
     }
   }
   '.source.GPD_Note':{
-    'boilerplate':{
-      'prefix':'///'
-      'body':'//Today//\n//End//\n\n//Todo//\n    ${1:Todo} ${0}\n//End//\n\n//Closed//\n//End//'
-    }
     'cost':{
       'prefix': '$'
       'body': '\$($1) $0'

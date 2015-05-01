@@ -29,11 +29,6 @@ footer_string = '//End//'
 note_header_pattern = '`\\((.*)\\)'
 
 module.exports =
-  configDefaults:
-    grammars:[
-      'source.GPD'
-      'source.GPD_Note'
-    ]
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
@@ -130,7 +125,7 @@ module.exports =
       editor.scanInBufferRange new RegExp(footer_regex, 'g'), range, (footer_result) ->
         footer_result.stop()
         editor.setCursorBufferPosition(footer_result.range.start)
-        editor.moveCursorLeft()
+        editor.moveLeft()
         editor.insertNewline()
         editor.moveToBeginningOfLine()
         editor.insertText('  ')
@@ -154,7 +149,7 @@ module.exports =
         editor.scanInBufferRange new RegExp(footer_regex, 'g'), range, (footer_result) ->
           footer_result.stop()
           editor.setCursorBufferPosition(footer_result.range.start)
-          editor.moveCursorLeft()
+          editor.moveLeft()
           editor.insertNewline()
           editor.moveToBeginningOfLine()
           todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
@@ -181,7 +176,7 @@ module.exports =
   create_note: (note_time, todo_str) ->
     note_header = "//" + note_time + "//\n"
     note_footer = "//End//\n\n"
-    note_boiler_str = (note_header + "    " + todo_str + "\n\n    \n"+ note_footer)
+    note_boiler_str = (note_header + "  " + todo_str + "\n\n  \n"+ note_footer)
     editor = atom.workspace.getActiveTextEditor()
     editor.unfoldAll()
     note_boiler_range = editor.getBuffer().insert([0,0], note_boiler_str)
@@ -198,7 +193,7 @@ module.exports =
     console.log("Higlight from: " + note_range.start + " to: " + note_range.end)
     editor = atom.workspace.getActiveTextEditor()
     before_note = new Range([0, 0], [note_range.start.row, 0])
-    after_note = new Range(note_range.end, editor.getEofBufferPosition())
+    after_note = new Range(note_range.end, editor.getBuffer().getEndPosition())
     editor.setSelectedBufferRanges([before_note, after_note])
     editor.foldSelectedLines()
 

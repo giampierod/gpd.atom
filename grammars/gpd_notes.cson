@@ -22,7 +22,7 @@ Description:
 'fileTypes': [
   'GPD_Note'
 ]
-'foldingStartmarker':'//(?!End)[\\w\\d\\s]*//'
+'foldingStartMarker':'//(?!End)[\\w\\s\\d\\.]*//'
 'foldingStopMarker': '//End//'
 'patterns': [
   {
