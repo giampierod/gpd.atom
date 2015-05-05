@@ -181,7 +181,6 @@ module.exports =
     editor.unfoldAll()
     note_boiler_range = editor.getBuffer().insert([0,0], note_boiler_str)
     @highlight_note(note_boiler_range)
-    console.log(note_boiler_range)
     editor.setCursorBufferPosition([note_boiler_range.end.row-3, 4])
 
 
@@ -189,11 +188,9 @@ module.exports =
   # Fold the other notes, and unfold the selected not so the user can focus
   # on the note they are working on.
   highlight_note: (note_range) ->
-    console.log("Called Highlight Note")
-    console.log("Higlight from: " + note_range.start + " to: " + note_range.end)
     editor = atom.workspace.getActiveTextEditor()
-    before_note = new Range([0, 0], [note_range.start.row, 0])
-    after_note = new Range(note_range.end, editor.getBuffer().getEndPosition())
+    before_note = [[0, 0], [note_range[0].row, 0]]
+    after_note = [note_range[1], editor.getBuffer().getEndPosition()]
     editor.setSelectedBufferRanges([before_note, after_note])
     editor.foldSelectedLines()
 
@@ -202,16 +199,19 @@ module.exports =
   find_note_header: (header_text) ->
     editor = atom.workspace.getActiveTextEditor()
     me = @
+    found = false
     editor.unfoldAll()
     editor.scanInBufferRange new RegExp("//" + header_text + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
       result.stop()
       editor.scanInBufferRange new RegExp("//End//", 'g'), [result.range.end,editor.getEofBufferPosition()], (footer_result) ->
         footer_result.stop()
-        note_range = new Range(result.range.start,footer_result.range.end)
+        note_range = [result.range.start, footer_result.range.end]
         me.highlight_note(note_range)
-        editor.setCursorBufferPosition([note_range.end.row-1, 0])
+        editor.setCursorBufferPosition([note_range[1].row-1, 0])
         editor.moveToEndOfLine()
-        return true
+        found = true
+    return found
+
 
   note_exists: (text) ->
     note_regex = new RegExp(note_header_pattern, 'g')
@@ -244,6 +244,7 @@ module.exports =
         inner_note = m[1]
         todo_str_min = todo_str.replace(m[0], "").trim()
         @open_note_file().then =>
+          console.log(@find_note_header(inner_note))
           if !@find_note_header(inner_note)
             @create_note(inner_note, todo_str_min)
       else
