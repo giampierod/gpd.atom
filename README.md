@@ -39,14 +39,13 @@ Shortcuts make GPD what it is, if you don't learn them it's not really going to 
 
 Note: In previous versions I used `⌘` for mac. Now all commands are using `ctrl`.
 
-###Sections
+###Sections7
 
 Todos are divided into different sections. Today, Goals, and Closed. These sections are noted by `//Section Name//` followed by an `//End//`. The Today, Todo, and Closed sections are mandatory for this Sublime Text package. You can create any other sections you want.
 
 
 ###License
-```
-																Apache License
+```																Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
 
