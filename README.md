@@ -31,11 +31,11 @@ A few steps and you will be on your way.
 ###Shortcuts
 Shortcuts make GPD what it is, if you don't learn them it's not really going to work that well.
 
-* `ctrl+shift+-` - Create a new Todo at the bottom of the //Todo// section
-* `ctrl+shift.` - Move the currently selected Todo at the top of the //Today// section
-* `ctrl+shift+]` - Move the current todo at the top of //Closed// section and put a ~(datetime.now) at the front of the todo
-* `ctrl+shift+[` - Do the same as `ctrl+shift+down` except it will also copy the todo to the bottom of the //Todo// section
-* `ctrl+k ctrl+,` - Get the note for this todo. It will either find or create the note for you in a companion `.GPD_Note` file. When in the GPD_Note file, you can press this again to switch back.
+* `ctrl+?` - Create a new Todo at the bottom of the //Todo// section
+* `ctrl+.` - Move the currently selected Todo at the top of the //Today// section
+* `ctrl+}` - Move the current todo at the top of //Closed// section and put a ~(datetime.now) at the front of the todo
+* `ctrl+{` - Do the same as `ctrl+}` except it will also copy the todo to the bottom of the //Todo// section
+* `ctrl+,` - Get the note for this todo. It will either find or create the note for you in a companion `.GPD_Note` file. When in the GPD_Note file, you can press this again to switch back the main GPD file.
 
 Note: In previous versions I used `⌘` for mac. Now all commands are using `ctrl`.
 
@@ -45,6 +45,7 @@ Todos are divided into different sections. Today, Goals, and Closed. These secti
 
 
 ###License
+```
 																Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -221,3 +222,4 @@ Todos are divided into different sections. Today, Goals, and Closed. These secti
       of your accepting any such warranty or additional liability.
 
    END OF TERMS AND CONDITIONS
+```
