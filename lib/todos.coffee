@@ -180,13 +180,19 @@ module.exports =
     editor = atom.workspace.getActiveTextEditor()
     editor.unfoldAll()
     note_boiler_range = editor.getBuffer().insert([0,0], note_boiler_str)
-    @highlight_note(note_boiler_range)
+    # Need to convert to array of points because I cannot seem to create a Range
+    # object in other parts of the code, and the highlight_note code assumes that
+    # note_range is an array of points with note_range[0] being the start
+    # and note_range[1] being the end. However, the range object does not
+    # guarantee that.
+    @highlight_note([note_boiler_range.start, note_boiler_range.end])
     editor.setCursorBufferPosition([note_boiler_range.end.row-3, 4])
 
 
 
   # Fold the other notes, and unfold the selected not so the user can focus
-  # on the note they are working on.
+  # on the note they are working on. Assumption that note_range is an array of
+  # points with note_range[0] being the start and note_range[1] being the end.
   highlight_note: (note_range) ->
     editor = atom.workspace.getActiveTextEditor()
     before_note = [[0, 0], [note_range[0].row, 0]]
