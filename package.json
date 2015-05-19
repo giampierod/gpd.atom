@@ -4,6 +4,13 @@
   "main": "./lib/todos",
   "private": true,
   "description": "GPD productivity system for Atom.",
+  "consumedServices": {
+    "status-bar": {
+      "versions": {
+        "^1.0.0": "consumeStatusBar"
+      }
+    }
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/giampierod/gpd.atom"
@@ -18,12 +25,15 @@
       "gpd.atom:select-todo",
       "gpd.atom:done-todo",
       "gpd.atom:done-todo-and-repeat",
-      "gpd.atom:toggle-note"
+      "gpd.atom:toggle-note",
+      "gpd.atom:start_timer",
+      "gpd.atom:abort_timer"
     ]
   },
   "dependencies": {
     "underscore-plus": "1.x",
-    "moment": "2.x"
+    "moment": "2.x",
+    "atom-space-pen-views": "^2.0.3"
   },
   "readmeFilename": "README.md",
   "homepage": "https://github.com/giampierod/gpd.atom"

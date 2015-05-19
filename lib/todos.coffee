@@ -20,13 +20,18 @@ Description:
 ###
 _ = require 'underscore-plus'
 {CompositeDisposable} = require 'atom'
+{exec, child} = require 'child_process'
 moment = require 'moment'
+PomodoroTimer = require './pomodoro-timer'
+PomodoroView = require './pomodoro-view'
+
 
 todo_header_string = '//Todo//'
 closed_header_string = '//Closed//'
 today_header_string = '//Today//'
 footer_string = '//End//'
 note_header_pattern = '`\\((.*)\\)'
+playSounds: false
 
 module.exports =
 
@@ -34,7 +39,6 @@ module.exports =
     @subscriptions = new CompositeDisposable
 
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:new-todo': => @new_todo()
-
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:select-todo': => @select_todo()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:done-todo': => @done_todo()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:done-todo-and-repeat': => @done_todo_and_repeat()
@@ -45,6 +49,16 @@ module.exports =
           @open_todo()
         else if editor.getGrammar().scopeName == 'source.GPD'
           @open_note()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:start_timer': => @start()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:abort_timer': => @abort()
+    @timer = new PomodoroTimer()
+    @view = new PomodoroView(@timer)
+    @timer.on 'finished', => @finish()
+    @timer.on 'rest', => @start_rest()
+
+  consumeStatusBar: (statusBar) ->
+    @statusBarTile = statusBar.addLeftTile(item: @view, priority: 100)
+
 
 
   select_todo: ->
@@ -261,3 +275,90 @@ module.exports =
     else
       console.log("No notes for headers.")
     editor.setCursorBufferPosition(cur_pos)
+
+  start: ->
+    console.log "pomodoro: start"
+    editor = atom.workspace.getActiveTextEditor()
+    cur_line = editor.getCursorBufferPosition()
+    editor.moveToEndOfLine()
+    end_of_line = editor.getCursorBufferPosition()
+    @todo_range = [[cur_line.row,0],end_of_line]
+    @filename = atom.workspace.getActiveTextEditor().getBuffer().getUri()
+    editor.setSelectedBufferRange(@todo_range)
+    todo = editor.getSelectedText()
+    timerObj = @timer
+    todo = todo.replace(/\$\([a-zA-Z0-9_/ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()',
+    todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
+    todo = todo.replace(/`\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '`()'
+    todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
+    timerObj.start(todo)
+    @newTodoTracker()
+
+  newTodoTracker: ->
+    range = @todo_range
+    editor = atom.workspace.getActiveTextEditor()
+    found = false
+    editor.scanInBufferRange /\$\([a-zA-Z0-9_/ ]*\)[ ]?/g, range, (result) ->
+      result.stop()
+      found = true
+      console.log(result)
+      editor.setCursorBufferPosition([range[1].row, range[1].column - 1])
+      editor.insertText("O")
+    if !found
+      editor.setCursorBufferPosition([range[1].row, range[1].column])
+      editor.insertText(" $(O)")
+    editor.moveToEndOfLine()
+    end_of_line = editor.getCursorBufferPosition()
+    range = [range[0],end_of_line]
+    @todo_range = range
+
+  updateTodoTracker: (text) ->
+    range = @todo_range
+    atom.workspace.open(@filename).then ->
+      editor = atom.workspace.getActiveTextEditor()
+      found = false
+      editor.scanInBufferRange /\$\([a-zA-Z0-9_/ ]*\)[ ]?/g, range, (result) ->
+        result.stop()
+        found = true
+        editor.setCursorBufferPosition([range[1].row, range[1].column - 1])
+        editor.selectLeft()
+        editor.insertText(text)
+      if !found
+        editor.setCursorBufferPosition([range[1].row, range[1].column])
+        editor.insertText(" $(" + text + ")")
+      editor.moveToEndOfLine()
+      end_of_line = editor.getCursorBufferPosition()
+      range = [range[0],end_of_line]
+    @todo_range = range
+
+
+  abort: ->
+    console.log "pomodoro: abort"
+    @timer.abort()
+    @updateTodoTracker("/")
+
+  finish: ->
+    console.log "pomodoro: finish"
+    atom.beep()
+    atom.focus()
+    atom.notifications.addSuccess("Pomodoro finished!")
+    @timer.finish()
+    @updateTodoTracker("X")
+
+  start_rest: ->
+    console.log "pomodoro: start_rest"
+    atom.beep()
+    atom.focus()
+    atom.notifications.addSuccess("Work Completed. Start Resting.")
+    @timer.start_rest()
+
+  exec: (path) ->
+    if path
+      exec path, (err, stdout, stderr) ->
+        if stderr
+          console.log stderr
+        console.log stdout
+
+  deactivate: ->
+    @view?.destroy()
+    @view = null
