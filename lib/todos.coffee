@@ -30,7 +30,7 @@ todo_header_string = '//Todo//'
 closed_header_string = '//Closed//'
 today_header_string = '//Today//'
 footer_string = '//End//'
-note_header_pattern = '`\\((.*)\\)'
+note_header_pattern = /`\(([a-zA-Z0-9_\"\., ]*)\)/
 playSounds: false
 
 module.exports =
@@ -234,8 +234,7 @@ module.exports =
 
 
   note_exists: (text) ->
-    note_regex = new RegExp(note_header_pattern, 'g')
-    if text.match(note_regex) then return note_regex.exec(text)[0] else return false
+    if text.match(note_header_pattern) then return note_header_pattern.exec(text)[0] else return false
 
   open_note_file: ->
     filename = atom.workspace.getActiveTextEditor().getBuffer().getUri() + "_Note"
@@ -259,10 +258,9 @@ module.exports =
     note_text = @note_exists(todo_str)
     if !@is_header(todo_str)
       if note_text
-        inner_note_regex = new RegExp(note_header_pattern, 'g')
-        m = inner_note_regex.exec(note_text)
-        inner_note = m[1]
-        todo_str_min = todo_str.replace(m[0], "").trim()
+        match = note_header_pattern.exec(note_text)
+        inner_note = match[1]
+        todo_str_min = todo_str.replace(match[0], "").trim()
         @open_note_file().then =>
           console.log(@find_note_header(inner_note))
           if !@find_note_header(inner_note)
