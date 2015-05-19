@@ -22,3 +22,4 @@ Description:
   'ctrl-,':'gpd.atom:toggle-note'
   'ctrl-}':'gpd.atom:done-todo'
   'ctrl-{':'gpd.atom:done-todo-and-repeat'
+  'ctrl-$':'gpd.atom:toggle-pomodoro'

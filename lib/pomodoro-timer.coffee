@@ -28,8 +28,9 @@ class PomodoroTimer extends events.EventEmitter
 
   TASK_TIME = 25 * 60 * 1000
   REST_TIME = 5 * 60 * 1000
-  
+
   start: (text) ->
+    @emit 'start'
     @startTime = new Date()
     @text = text
     @timer = setInterval ( => @step(TASK_TIME,"TASK") ), 1000

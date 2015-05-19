@@ -51,15 +51,22 @@ module.exports =
           @open_note()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:start_timer': => @start()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:abort_timer': => @abort()
+    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd.atom:toggle-pomodoro': => @toggle_pomodoro()
     @timer = new PomodoroTimer()
     @view = new PomodoroView(@timer)
     @timer.on 'finished', => @finish()
     @timer.on 'rest', => @start_rest()
+    @timer.on 'start', =>
+      @pomodoro_state = "STARTED"
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addLeftTile(item: @view, priority: 100)
 
-
+  toggle_pomodoro: ->
+    if @pomodoro_state == "STARTED"
+      @abort()
+    else
+      @start()
 
   select_todo: ->
     editor = atom.workspace.getActiveTextEditor()
@@ -289,6 +296,7 @@ module.exports =
     todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
     todo = todo.replace(/`\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '`()'
     todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
+    atom.notifications.addSuccess("🍅 Started: '#{todo}'")
     timerObj.start(todo)
     @newTodoTracker()
 
@@ -334,20 +342,23 @@ module.exports =
     console.log "pomodoro: abort"
     @timer.abort()
     @updateTodoTracker("/")
+    atom.notifications.addWarning("🍅 Aborted")
+    @pomodoro_state = "ABORTED"
 
   finish: ->
     console.log "pomodoro: finish"
     atom.beep()
     atom.focus()
-    atom.notifications.addSuccess("Pomodoro finished!")
+    atom.notifications.addSuccess("🍅 Finished!")
     @timer.finish()
     @updateTodoTracker("X")
+    @pomodoro_state = "FINISHED"
 
   start_rest: ->
     console.log "pomodoro: start_rest"
     atom.beep()
     atom.focus()
-    atom.notifications.addSuccess("Work Completed. Start Resting.")
+    atom.notifications.addSuccess("🍅 Work Completed. Start Resting.")
     @timer.start_rest()
 
   exec: (path) ->

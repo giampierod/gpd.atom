@@ -27,7 +27,8 @@
       "gpd.atom:done-todo-and-repeat",
       "gpd.atom:toggle-note",
       "gpd.atom:start_timer",
-      "gpd.atom:abort_timer"
+      "gpd.atom:abort_timer",
+      "gpd.atom:toggle-pomodoro"
     ]
   },
   "dependencies": {

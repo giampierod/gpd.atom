@@ -26,7 +26,7 @@ module.exports =
 class PomodoroView extends View
   @content: ->
     @div class: "pomodoro inline-block", =>
-      @span style: "color: red", "#{String.fromCharCode(10086)} "
+      @span style: "color: red", "🍅"
       @span outlet: 'statusText'
 
   initialize: (timer) ->
