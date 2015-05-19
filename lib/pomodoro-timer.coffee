@@ -26,11 +26,9 @@ events = require 'events'
 module.exports =
 class PomodoroTimer extends events.EventEmitter
 
-  # TASK_TIME = 25 * 60 * 1000
-  # REST_TIME = 5 * 60 * 1000
-  TASK_TIME = 5 * 1000
-  REST_TIME = 10 * 1000
-
+  TASK_TIME = 25 * 60 * 1000
+  REST_TIME = 5 * 60 * 1000
+  
   start: (text) ->
     @startTime = new Date()
     @text = text
