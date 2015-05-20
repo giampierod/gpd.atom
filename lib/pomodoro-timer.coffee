@@ -26,14 +26,13 @@ events = require 'events'
 module.exports =
 class PomodoroTimer extends events.EventEmitter
 
-  TASK_TIME = 25 * 60 * 1000
-  REST_TIME = 5 * 60 * 1000
-
   start: (text) ->
+    task_length = atom.config.get 'gpd.pomodoroLengthMinutes'
+    task_time = task_length * 60 * 1000
     @emit 'start'
     @startTime = new Date()
     @text = text
-    @timer = setInterval ( => @step(TASK_TIME,"TASK") ), 1000
+    @timer = setInterval ( => @step(task_time,"TASK") ), 1000
 
   abort: ->
     @status = "Aborted (#{@text})"
@@ -44,10 +43,12 @@ class PomodoroTimer extends events.EventEmitter
     @stop()
 
   start_rest: ->
+    rest_length = atom.config.get 'gpd.restLengthMinutes'
+    rest_time = rest_length * 60 * 1000
     @status = "Rest"
     @stop()
     @startTime = new Date()
-    @timer = setInterval ( => @step(REST_TIME,"REST") ), 1000
+    @timer = setInterval ( => @step(rest_time,"REST") ), 1000
 
   stop: ->
     clearTimeout @timer

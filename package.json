@@ -21,14 +21,14 @@
   },
   "activationCommands": {
     "atom-workspace": [
-      "gpd.atom:new-todo",
-      "gpd.atom:select-todo",
-      "gpd.atom:done-todo",
-      "gpd.atom:done-todo-and-repeat",
-      "gpd.atom:toggle-note",
-      "gpd.atom:start_timer",
-      "gpd.atom:abort_timer",
-      "gpd.atom:toggle-pomodoro"
+      "gpd:new-todo",
+      "gpd:select-todo",
+      "gpd:done-todo",
+      "gpd:done-todo-and-repeat",
+      "gpd:toggle-note",
+      "gpd:start_timer",
+      "gpd:abort_timer",
+      "gpd:toggle-pomodoro"
     ]
   },
   "dependencies": {

@@ -7,8 +7,6 @@ The GPD system is meant for people who spend a great deal of time text editing. 
 To install GPD, you first need to install the Atom text editor. Go to the following link to download, http://atom.io/.
 
 ###Install Method
-Will Bond has made a great plugin that loads packages into Sublime Text. If you use this method you will automatically get updates of GPD when they are released. I highly recommend using this approach.
-
 1. Start Atom
 2. Press `ctrl+shift+p` (Windows/Linux) or `command+shift+p` (Mac) and type Install Package. You should see "Settings View: Install Package".
 3. In the search box, type "GPD" and press enter.
@@ -36,10 +34,11 @@ Shortcuts make GPD what it is, if you don't learn them it's not really going to 
 * `ctrl+}` - Move the current todo at the top of //Closed// section and put a ~(datetime.now) at the front of the todo
 * `ctrl+{` - Do the same as `ctrl+}` except it will also copy the todo to the bottom of the //Todo// section
 * `ctrl+,` - Get the note for this todo. It will either find or create the note for you in a companion `.GPD_Note` file. When in the GPD_Note file, you can press this again to switch back the main GPD file.
+* `ctrl+$` - (experimental) Start/abort a 25 minute pomodoro timer. This enters a $(Cost) marker into your Todo and initially sticks an "O" to mark the start of a pomodoro. If you abort the pomodoro the "O" is replaced with a "/", if you finish the pomodoro with a 5 minute rest it is replaced with an "X".
 
 Note: In previous versions I used `⌘` for mac. Now all commands are using `ctrl`.
 
-###Sections7
+###Sections
 
 Todos are divided into different sections. Today, Goals, and Closed. These sections are noted by `//Section Name//` followed by an `//End//`. The Today, Todo, and Closed sections are mandatory for this Sublime Text package. You can create any other sections you want.
 
@@ -223,3 +222,27 @@ Todos are divided into different sections. Today, Goals, and Closed. These secti
 
    END OF TERMS AND CONDITIONS
 ```
+
+###Attribution
+Thank you to Yoshiori SHOJI who provided the original pomodoro code that was used from https://github.com/yoshiori/pomodoro with the following license:
+
+Copyright (c) 2014 Yoshiori SHOJI
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+"Software"), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
