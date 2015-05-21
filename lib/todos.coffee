@@ -1,23 +1,12 @@
 ###
-Copyright 2014 Giampiero De Ciantis
+Copyright 2014 Giampiero De Ciantis. The license text can be found in the
+`LICENSE` file provided with this project.'
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Filename: /lib/todos.coffee
 Description:
   All logic for commands in gpd.atom. These commands can create, move, complete,
   and repeat GPD todos. Also commands for toggling the Notes view.
 ###
+
 _ = require 'underscore-plus'
 {CompositeDisposable} = require 'atom'
 {exec, child} = require 'child_process'
