@@ -1,49 +1,47 @@
-###About the GPD System
+### About the GPD System
 
-The GPD system is meant for people who spend a great deal of time text editing. It is a Todo app with the power of GTD and Mark Forster's Final Version with ninjitsu shortcuts for maximum workflow speed. Except for Section headers every line is a todo item. Special symbols allow you to understand different aspects of the todo item. Using combinations of regular and symbolic text, everything is free form text.  
+The GPD system is meant for people who spend a great deal of time text editing. It is a Todo app with the power of GTD and Mark Forster's Final Version with ninjutsu shortcuts for maximum speed. Except for section headers, every line is a Todo item. Special symbols allow you to understand different aspects of the Todo item. Using combinations of regular and symbolic text, everything is free-form text.
 
-###Pre-Requisites
+### Pre-Requisites
 
 To install GPD, you first need to install the Atom text editor. Go to the following link to download, http://atom.io/.
 
-###Install Method
+### Install Method
 1. Start Atom
-2. Press `ctrl+shift+p` (Windows/Linux) or `command+shift+p` (Mac) and type Install Package. You should see "Settings View: Install Package".
+2. Press <kbd>ctrl</kbd><kbd>shift</kbd><kbd>p</kbd> (<kbd>⌘</kbd><kbd>⌥</kbd><kbd>p</kbd>) and type "Install Package". You should see "Settings View: Install Package".
 3. In the search box, type "GPD" and press enter.
 4. Find the GPD package and click the install button.
 
-###Getting started
+### Getting started
 A few steps and you will be on your way.
 
-1. Create new file and give it the extension `.GPD` and open it in Atom.
+1. Create new file, give it the extension `.GPD`, and open it in Atom.
 2. Type `///,Tab`. It will instantly give you the section layouts and put your cursor in the `Todo` section.
-3. Create some Todos. Use symbols to note various aspects of the Todo. For all the symbols available (#, !, @, $, ~, \`) you can type `symbol,Tab` to enter them. All of the symbols represent different attributes of the todo:
-	* `#,Tab` --> #(Project) - The project or group of work that this todo is part of.
-	* `!,Tab` --> !(Target) - A measurable target for the todo. For example, a date, a specific performance metric, etc.
-	* `@,Tab` --> @(Context) - People, places, or things that are related or required for the Todo. Such as a meeting room, a person whom you are waiting for or may need to call.
-	* `$,Tab` --> $(Cost) - The amount of time or other cost metric that should be accounted for this todo.
-	* `~,Tab` --> ~(Completion Date) - The date that you finished the todo.
-	* ```,Tab`` --> `(Note ID) - An ID that references the Note attached to this todo
-4. Once you got this under control, you will want to get familiar with the shortucts.
+3. Create some Todos. Use symbols to note various aspects of the Todo. For all the symbols available (`#`, `!`, `@`, `$`, `~`, ` ` `) you can type <kbd>symbol</kbd> <kbd>tab</kbd> to enter them. All of the symbols represent different attributes of the Todo:
+	* <kbd>#</kbd> <kbd>tab</kbd> → `#(Project)` - The project or group of work that this Todo is part of.
+	* <kbd>!</kbd> <kbd>tab</kbd> → `!(Target)` - A measurable target for the Todo. E.g.: a date, a specific performance metric, &c.
+	* <kbd>@</kbd> <kbd>tab</kbd> → `@(Context)` - People, places, or things that are related or required for the Todo. E.g.: a meeting room, a person who you are waiting for.
+	* <kbd>$</kbd> <kbd>tab</kbd> → `$(Cost)` - The amount of time or other cost metric that should be accounted for this Todo.
+	* <kbd>~</kbd> <kbd>tab</kbd> → `~(Completion Date)` - The date that you finished the Todo.
+	* <kbd>,</kbd> <kbd>tab</kbd> → `(Note ID)` - An ID that references the Note attached to this Todo
+4. Once you've mastered this, you will want to get familiar with the shortcuts.
 
-###Shortcuts
-Shortcuts make GPD what it is, if you don't learn them it's not really going to work that well.
+### Shortcuts
+Shortcuts make GPD what it is. If you don't learn them it's not really going to work that well.
 
-* `ctrl+?` - Create a new Todo at the bottom of the //Todo// section
-* `ctrl+.` - Move the currently selected Todo at the top of the //Today// section
-* `ctrl+}` - Move the current todo at the top of //Closed// section and put a ~(datetime.now) at the front of the todo
-* `ctrl+{` - Do the same as `ctrl+}` except it will also copy the todo to the bottom of the //Todo// section
-* `ctrl+,` - Get the note for this todo. It will either find or create the note for you in a companion `.GPD_Note` file. When in the GPD_Note file, you can press this again to switch back the main GPD file.
-* `ctrl+$` - (experimental) Start/abort a 25 minute pomodoro timer. This enters a $(Cost) marker into your Todo and initially sticks an "O" to mark the start of a pomodoro. If you abort the pomodoro the "O" is replaced with a "/", if you finish the pomodoro with a 5 minute rest it is replaced with an "X".
+* <kbd>ctrl</kbd><kbd>?</kbd> - Create a new Todo at the bottom of the ``//Todo//`` section
+* <kbd>ctrl</kbd><kbd>.</kbd> - Move the currently selected Todo to the top of the ``//Today//`` section
+* <kbd>ctrl</kbd><kbd>}</kbd> - Move the current Todo to the top of ``//Closed//`` section and put a `~(datetime.now)` in front of it
+* <kbd>ctrl</kbd><kbd>{</kbd> - As above, but also copy the Todo to the bottom of the ``//Todo//`` section (for repeat tasks)
+* <kbd>ctrl</kbd><kbd>,</kbd> - Find or create the note for current Todo in a companion `.GPD_Note` file. When in the `.GPD_Note` file, you can press this again to switch back the main `.GPD` file.
+* <kbd>ctrl</kbd><kbd>$</kbd> - (experimental) Start/abort a 25 minute Pomodoro timer. Also appends an `O` to the cost metric field to mark the start of a Pomodoro. If you abort the Pomodoro, the `O` is replaced with a `/`, and if you finish the Pomodoro it is replaced with an `X`.
 
-Note: In previous versions I used `⌘` for mac. Now all commands are using `ctrl`.
+### Sections
 
-###Sections
-
-Todos are divided into different sections. Today, Goals, and Closed. These sections are noted by `//Section Name//` followed by an `//End//`. The Today, Todo, and Closed sections are mandatory for this Sublime Text package. You can create any other sections you want.
+Todos are divided into different sections: **Today**, **Goals**, and **Closed**. These sections are denoted by `//Section Name//` followed by `//End//`. The **Today**, **Todo**, and **Closed** sections are mandatory for this package, but you are free to create any other sections you want.
 
 
-###License
+### License
 ```
                                Apache License
                           Version 2.0, January 2004
@@ -223,8 +221,8 @@ Todos are divided into different sections. Today, Goals, and Closed. These secti
    END OF TERMS AND CONDITIONS
 ```
 
-###Attribution
-Thank you to Yoshiori SHOJI who provided the original pomodoro code that was used from https://github.com/yoshiori/pomodoro with the following license:
+### Attribution
+Thank you to Yoshiori SHOJI who provided the original Pomodoro code that was used from https://github.com/yoshiori/pomodoro with the following license:
 
 Copyright (c) 2014 Yoshiori SHOJI
 
