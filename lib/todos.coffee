@@ -32,6 +32,9 @@ module.exports =
       type: 'integer'
       default: '5'
       minimum: '1'
+    dateFormat:
+      type: 'string'
+      default: "YYYY-MM-DD hh:mm"
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
@@ -175,7 +178,8 @@ module.exports =
 
 
   close_todo: ->
-    closed_time = ("~(" + moment().format("DD/MM/YY hh:mm") + ") ")
+    date_format = atom.config.get 'gpd.dateFormat'
+    closed_time = ("~(" + moment().format(date_format) + ") ")
     return @move_todo_to_section("Closed", closed_time)
 
   # Create a new note section with boilerplate text in the view supplied
@@ -242,7 +246,8 @@ module.exports =
   open_note: ->
     editor = atom.workspace.getActiveTextEditor()
     cur_pos = editor.getCursorBufferPosition()
-    note_time =  moment().format("YYYY.MM.DD.hh.mm")
+    date_format = atom.config.get 'gpd.dateFormat'
+    note_time =  moment().format(date_format)
     editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
     editor.selectToBeginningOfLine()
