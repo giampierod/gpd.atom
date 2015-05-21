@@ -44,7 +44,7 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:done-todo': => @done_todo()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:done-todo-and-repeat': => @done_todo_and_repeat()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-note': =>
-      editor = atom.workspace.getActiveTextEditor()
+      editor = @get_editor()
       editor.transact =>
         switch editor.getGrammar().scopeName
           when 'source.GPD_Note' then @open_todo()
@@ -59,6 +59,8 @@ module.exports =
     @timer.on 'start', =>
       @pomodoro_state = "STARTED"
 
+  get_editor: -> atom.workspace.getActiveTextEditor()
+
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addLeftTile(item: @view, priority: 100)
 
@@ -69,7 +71,7 @@ module.exports =
       @start()
 
   attempt: (fn) ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     if editor.getGrammar().scopeName == 'source.GPD'
       editor.transact =>
         if !fn.call(@)
@@ -88,7 +90,7 @@ module.exports =
     header_pattern.test(text)
 
   move_todo_to_section: (section, prefix) ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     cur_line = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
@@ -122,7 +124,7 @@ module.exports =
 
   create_todo: ->
     console.log("Creating todo")
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     cur_line = editor.getCursorBufferPosition()
     range = [[0,0], editor.getEofBufferPosition()]
     header_regex = _.escapeRegExp(todo_header_string)
@@ -141,7 +143,7 @@ module.exports =
 
 
   add_to_todo: ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     cur_line = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
@@ -186,7 +188,7 @@ module.exports =
     note_header = "//" + note_time + "//\n"
     note_footer = "//End//\n\n"
     note_boiler_str = (note_header + "  " + todo_str + "\n\n  \n"+ note_footer)
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     editor.unfoldAll()
     note_boiler_range = editor.getBuffer().insert([0,0], note_boiler_str)
     # Need to convert to array of points because I cannot seem to create a Range
@@ -203,7 +205,7 @@ module.exports =
   # on the note they are working on. Assumption that note_range is an array of
   # points with note_range[0] being the start and note_range[1] being the end.
   highlight_note: (note_range) ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     before_note = [[0, 0], [note_range[0].row, 0]]
     after_note = [note_range[1], editor.getBuffer().getEndPosition()]
     editor.setSelectedBufferRanges([before_note, after_note])
@@ -212,7 +214,7 @@ module.exports =
 
   # Find a note with the given header_text in the view
   find_note_header: (header_text) ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     me = @
     found = false
     editor.unfoldAll()
@@ -232,18 +234,18 @@ module.exports =
     if text.match(note_header_pattern) then return note_header_pattern.exec(text)[0] else return false
 
   open_note_file: ->
-    filename = atom.workspace.getActiveTextEditor().getBuffer().getUri() + "_Note"
+    filename = @get_editor().getBuffer().getUri() + "_Note"
     return atom.workspace.open(filename)
 
 
   open_todo: ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     editor.transact ->
-      filename = atom.workspace.getActiveTextEditor().getBuffer().getUri().replace('.GPD_Note','.GPD')
+      filename = editor.getBuffer().getUri().replace('.GPD_Note','.GPD')
       return atom.workspace.open(filename)
 
   open_note: ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     cur_pos = editor.getCursorBufferPosition()
     date_format = atom.config.get 'gpd.dateFormat'
     note_time =  moment().format(date_format)
@@ -273,12 +275,12 @@ module.exports =
   start: ->
     console.log "pomodoro: start"
     restLength = atom.config.get 'gpd.restLengthMinutes'
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     cur_line = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
     end_of_line = editor.getCursorBufferPosition()
     @todo_range = [[cur_line.row,0],end_of_line]
-    @filename = atom.workspace.getActiveTextEditor().getBuffer().getUri()
+    @filename = editor.getBuffer().getUri()
     editor.setSelectedBufferRange(@todo_range)
     todo = editor.getSelectedText()
     timerObj = @timer
@@ -292,7 +294,7 @@ module.exports =
     @newTodoTracker()
 
   newTodoTracker: ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @get_editor()
     if editor.getGrammar().scopeName == 'source.GPD'
       range = @todo_range
       found = false
@@ -316,8 +318,8 @@ module.exports =
 
   updateTodoTracker: (text) ->
     range = @todo_range
+    editor = @get_editor()
     atom.workspace.open(@filename).then ->
-      editor = atom.workspace.getActiveTextEditor()
       editor.moveToEndOfLine()
       end_of_line = editor.getCursorBufferPosition()
       range = [range[0],end_of_line]
