@@ -20,11 +20,11 @@ Description:
   '.source.GPD':{
     'boilerplate':{
       'prefix':'///'
-      'body':'//Today//\n//End//\n\n//Todo//\n    ${1:Todo} ${0}\n//End//\n\n//Closed//\n//End//'
+      'body':'//Today//\n//End//\n\n//Todo//\n    ${1}\n//End//\n\n//Closed//\n//End//'
     }
     'cost':{
       'prefix': '$'
-      'body': '\$($1) $0'
+      'body': '\$(${1:cost}) $0'
     }
     'completion_time':{
       'prefix': '~'
@@ -32,29 +32,29 @@ Description:
     }
     'context':{
       'prefix': '@'
-      'body': '@(${1:Some_Context}) $0'
+      'body': '@(${1:context}) $0'
     }
     'note':{
       'prefix': '`'
-      'body': '`($0)'
+      'body': '`(${0:note})'
     }
     'project':{
       'prefix':'#'
-      'body': '#(${1:Some_Project}) $0'
+      'body': '#(${1:project}) $0'
     }
     'section_header':{
       'prefix': '//'
-      'body':'//${1:Some Title}//\n$0\n//End//'
+      'body':'//${1:Section}//\n$0\n//End//'
     }
     'target':{
       'prefix': '!'
-      'body': '!(${1:Some_Target}) $0'
+      'body': '!(${1:target}) $0'
     }
   }
   '.source.GPD_Note':{
     'cost':{
       'prefix': '$'
-      'body': '\$($1) $0'
+      'body': '\$(${1:cost}) $0'
     }
     'completion_time':{
       'prefix': '~'
@@ -62,24 +62,23 @@ Description:
     }
     'context':{
       'prefix': '@'
-      'body': '@(${1:Some_Context}) $0'
+      'body': '@(${1:context}) $0'
     }
     'note':{
       'prefix': '`'
-      'body': '`($0)'
+      'body': '`(${0:note})'
     }
     'project':{
       'prefix':'#'
-      'body': '#(${1:Some_Project}) $0'
+      'body': '#(${1:project}) $0'
     }
     'section_header':{
       'prefix': '//'
-      'body':'//${1:Some Title}//\n$0\n//End//'
+      'body':'//${1:Section}//\n$0\n//End//'
     }
     'target':{
       'prefix': '!'
-      'body': '!(${1:Some_Target}) $0'
+      'body': '!(${1:target}) $0'
     }
   }
-
 }
