@@ -77,33 +77,20 @@ module.exports =
     else
       @start()
 
-  select_todo: ->
+  attempt: (fn) ->
     editor = atom.workspace.getActiveTextEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
-      if !@move_todo_to_section('Today')
+      if !fn.call(@)
         editor.abortTransaction()
 
-  done_todo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !@close_todo()
-        editor.abortTransaction()
+  select_todo: -> @attempt(-> @move_todo_to_section 'Today')
 
-  new_todo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !@create_todo()
-        editor.abortTransaction()
+  done_todo: -> @attempt(@close_todo)
 
-  done_todo_and_repeat: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !@add_to_todo() || !@close_todo()
-        editor.abortTransaction()
+  new_todo: -> @attempt(@create_todo)
+
+  done_todo_and_repeat: -> @attempt(-> @add_to_todo() && @close_todo())
 
   is_header: (text) ->
     header_pattern = new RegExp('//(.*)//')
