@@ -46,10 +46,9 @@ module.exports =
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-note': =>
       editor = atom.workspace.getActiveTextEditor()
       editor.transact =>
-        if editor.getGrammar().scopeName == 'source.GPD_Note'
-          @open_todo()
-        else if editor.getGrammar().scopeName == 'source.GPD'
-          @open_note()
+        switch editor.getGrammar().scopeName
+          when 'source.GPD_Note' then @open_todo()
+          when 'source.GPD' then @open_note()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:start_timer': => @start()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:abort_timer': => @abort()
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-pomodoro': => @toggle_pomodoro()
@@ -71,10 +70,10 @@ module.exports =
 
   attempt: (fn) ->
     editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !fn.call(@)
-        editor.abortTransaction()
+    if editor.getGrammar().scopeName == 'source.GPD'
+      editor.transact =>
+        if !fn.call(@)
+          editor.abortTransaction()
 
   select_todo: -> @attempt(-> @move_todo_to_section 'Today')
 
