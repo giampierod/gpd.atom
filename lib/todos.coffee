@@ -65,17 +65,13 @@ module.exports =
     @statusBarTile = statusBar.addLeftTile(item: @view, priority: 100)
 
   toggle_pomodoro: ->
-    if @pomodoro_state == "STARTED"
-      @abort()
-    else
-      @start()
+    @pomodoro_state == "STARTED" && @abort() || @start()
 
   attempt: (fn) ->
     editor = @get_editor()
     if editor.getGrammar().scopeName == 'source.GPD'
       editor.transact =>
-        if !fn.call(@)
-          editor.abortTransaction()
+        fn.call(@) || editor.abortTransaction()
 
   select_todo: -> @attempt(-> @move_todo_to_section 'Today')
 
@@ -85,9 +81,7 @@ module.exports =
 
   done_todo_and_repeat: -> @attempt(-> @add_to_todo() && @close_todo())
 
-  is_header: (text) ->
-    header_pattern = new RegExp('//(.*)//')
-    header_pattern.test(text)
+  is_header: (text) -> RegExp('//(.*)//').test(text)
 
   move_todo_to_section: (section, prefix) ->
     editor = @get_editor()
@@ -97,7 +91,11 @@ module.exports =
     editor.setSelectedBufferRange([[cur_line.row,0],end_of_line])
     todo = editor.getSelectedText()
     todo = todo.replace(/(^\s+|\s+$)/g,'')
-    if !@is_header(editor.getSelectedText())
+    if @is_header(todo)
+        console.log("Can't move section marker")
+        editor.setCursorBufferPosition(cur_line)
+        return false
+    else
       editor.delete()
       editor.delete()
       range = [[0,0], editor.getEofBufferPosition()]
@@ -106,21 +104,14 @@ module.exports =
         result.stop()
         editor.setCursorBufferPosition(result.range.end)
         editor.insertNewline()
-        editor.moveToBeginningOfLine()
+        editor.moveToFirstCharacterOfLine()
         editor.insertText('  ')
-        if typeof prefix != 'undefined'
-          editor.insertText(prefix)
+        prefix && editor.insertText(prefix)
         editor.insertText(todo)
         paste_line = editor.getCursorBufferPosition()
-        if paste_line.row < cur_line.row
-          editor.setCursorBufferPosition([cur_line.row + 1, 0])
-        else
-          editor.setCursorBufferPosition([cur_line.row, 0])
+        rows_down = if paste_line.row < cur_line.row then 1 else 0
+        editor.setCursorBufferPosition( [cur_line.row + rows_down, 0] )
       return true
-    else
-      console.log("Can't move section marker")
-      editor.setCursorBufferPosition(cur_line)
-      return false
 
   create_todo: ->
     console.log("Creating todo")
