@@ -26,8 +26,8 @@
       "gpd:done-todo",
       "gpd:done-todo-and-repeat",
       "gpd:toggle-note",
-      "gpd:start_timer",
-      "gpd:abort_timer",
+      "gpd:start-timer",
+      "gpd:abort-timer",
       "gpd:toggle-pomodoro"
     ]
   },

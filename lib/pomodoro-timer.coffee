@@ -27,12 +27,12 @@ module.exports =
 class PomodoroTimer extends events.EventEmitter
 
   start: (text) ->
-    task_length = atom.config.get 'gpd.pomodoroLengthMinutes'
-    task_time = task_length * 60 * 1000
+    taskLength = atom.config.get 'gpd.pomodoroLengthMinutes'
+    taskTime = taskLength * 60 * 1000
     @emit 'start'
     @startTime = new Date()
     @text = text
-    @timer = setInterval ( => @step(task_time,"TASK") ), 1000
+    @timer = setInterval ( => @step(taskTime,"TASK") ), 1000
 
   abort: ->
     @status = "Aborted (#{@text})"
@@ -42,20 +42,20 @@ class PomodoroTimer extends events.EventEmitter
     @status = "Finished (#{@text})"
     @stop()
 
-  start_rest: ->
-    rest_length = atom.config.get 'gpd.restLengthMinutes'
-    rest_time = rest_length * 60 * 1000
+  startRest: ->
+    restLength = atom.config.get 'gpd.restLengthMinutes'
+    restTime = restLength * 60 * 1000
     @status = "Rest"
     @stop()
     @startTime = new Date()
-    @timer = setInterval ( => @step(rest_time,"REST") ), 1000
+    @timer = setInterval ( => @step(restTime,"REST") ), 1000
 
   stop: ->
     clearTimeout @timer
     @updateCallback(@status)
 
-  step: (time_length, type) ->
-    time = (time_length - (new Date() - @startTime)) / 1000
+  step: (timeLength, type) ->
+    time = (timeLength - (new Date() - @startTime)) / 1000
     rest = ""
     if type == "REST"
       rest = "Rest for "

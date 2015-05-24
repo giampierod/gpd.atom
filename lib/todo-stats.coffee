@@ -1,4 +1,4 @@
-'_license':"""
+###
 Copyright 2015 Giampiero De Ciantis
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,13 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Filename: keymaps/gpd.cson
+Filename: /lib/todos.coffee
 Description:
-  Shortcut key combinations for all commands for gpd.atom."""
-'atom-workspace':
-  'ctrl-?':'gpd:new-todo'
-  'ctrl-.':'gpd:select-todo'
-  'ctrl-,':'gpd:toggle-note'
-  'ctrl-}':'gpd:done-todo'
-  'ctrl-{':'gpd:done-todo-and-repeat'
-  'ctrl-$':'gpd:toggle-pomodoro'
+  All logic for commands in gpd.atom. These commands can create, move, complete,
+  and repeat GPD todos. Also commands for toggling the Notes view.
+###
