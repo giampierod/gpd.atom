@@ -35,11 +35,11 @@ class PomodoroTimer extends events.EventEmitter
     @timer = setInterval ( => @step(task_time,"TASK") ), 1000
 
   abort: ->
-    @status = "Aborted (#{@text})"
+    @status = "Aborted: #{@text}"
     @stop()
 
   finish: ->
-    @status = "Finished (#{@text})"
+    @status = "Finished: #{@text}"
     @stop()
 
   start_rest: ->
