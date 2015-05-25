@@ -26,7 +26,7 @@ module.exports =
 class PomodoroView extends View
   @content: ->
     @div class: "pomodoro inline-block", =>
-      @img src: "atom://gpd/resources/pomodoro.png", height: '22px'
+      @img src: "atom://gpd/resources/pomodoro.png", height: '10px'
       @span style: "color: red", outlet: 'statusText'
 
   initialize: (timer) ->
