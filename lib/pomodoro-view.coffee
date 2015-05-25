@@ -26,8 +26,8 @@ module.exports =
 class PomodoroView extends View
   @content: ->
     @div class: "pomodoro inline-block", =>
-      @span style: "color: red", "🍅"
-      @span outlet: 'statusText'
+      @img src: "atom://gpd/resources/pomodoro.png", height: '22px'
+      @span style: "color: red", outlet: 'statusText'
 
   initialize: (timer) ->
     timer.setUpdateCallback(@update)

@@ -45,6 +45,7 @@ module.exports =
       minimum: '1'
 
   activate: (state) ->
+    atom.static.variables.pomodoro = "atom://gpd/resources/pomodoro.png"
     @subscriptions = new CompositeDisposable
 
     @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:new-todo': => @newTodo()
@@ -306,7 +307,7 @@ module.exports =
     todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
     todo = todo.replace(/`\([a-zA-Z0-9_\"\., ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '`()'
     todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-    atom.notifications.addSuccess("🍅 Started: '#{todo}'")
+    atom.notifications.addSuccess("Started: '#{todo}'", {icon: "pomodoro"})
     timerObj.start(todo)
     @todo = todo
     @newTodoTracker()
@@ -372,14 +373,14 @@ module.exports =
     console.log "pomodoro: abort"
     @timer.abort()
     @updateTodoTracker("/")
-    atom.notifications.addWarning("🍅 Aborted #{@todo}")
+    atom.notifications.addWarning("Aborted #{@todo}", {icon: "circle-slash"})
     @pomodoroState = "ABORTED"
 
   finish: ->
     console.log "pomodoro: finish"
     atom.beep()
     atom.focus()
-    atom.notifications.addSuccess("🍅 Finished #{@todo}")
+    atom.notifications.addSuccess("Finished #{@todo}")
     @timer.finish()
     @updateTodoTracker("X")
     @pomodoroState = "FINISHED"
@@ -388,7 +389,7 @@ module.exports =
     console.log "pomodoro: startRest"
     atom.beep()
     atom.focus()
-    atom.notifications.addSuccess("🍅 #{@todo} Work Completed. Start Resting.")
+    atom.notifications.addSuccess("#{@todo} Work Completed. Start Resting.", {icon: "clock"})
     @timer.startRest()
 
   exec: (path) ->
