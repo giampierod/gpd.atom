@@ -13,8 +13,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-Filename: /lib/todos.coffee
+Filename: /lib/todo-stats.coffee
 Description:
-  All logic for commands in gpd.atom. These commands can create, move, complete,
-  and repeat GPD todos. Also commands for toggling the Notes view.
+  Statistics computations for GPD
 ###
+
+{CompositeDisposable} = require 'atom'
+
+module.exports =
+
+  # For the current line return all the unique Todos that are in the marked
+  # project
+  countTodosInProject: ->
+    return
+
+  # Get all the pomodoro stats...
+  pomodoroStats: ->
+    return
