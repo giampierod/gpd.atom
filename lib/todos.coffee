@@ -26,9 +26,9 @@ PomodoroTimer = require './pomodoro-timer'
 PomodoroView = require './pomodoro-view'
 
 
-todoHeaderString = '//Todo//'
+todoHeaderString = '//Backlog//'
 closedHeaderString = '//Closed//'
-todayHeaderString = '//Today//'
+todayHeaderString = '//Todo//'
 footerString = '//End//'
 noteHeaderPattern = /`\(([a-zA-Z0-9_\"\., ]*)\)/
 playSounds: false
@@ -85,7 +85,7 @@ module.exports =
     editor = atom.workspace.getActiveTextEditor()
     return unless editor.getGrammar().scopeName == 'source.GPD'
     editor.transact =>
-      if !@moveTodoToSection('Today')
+      if !@moveTodoToSection('Todo')
         editor.abortTransaction()
 
   doneTodo: ->
@@ -203,7 +203,7 @@ module.exports =
 
 
   closeTodo: ->
-    closedTime = ("~(" + moment().format("DD/MM/YY hh:mm") + ") ")
+    closedTime = ("~(#{moment().format("DD/MM/YY hh:mm")}) ")
     return @moveTodoToSection("Closed", closedTime)
 
   # Create a new note section with boilerplate text in the view supplied
@@ -241,7 +241,7 @@ module.exports =
     me = @
     found = false
     editor.unfoldAll()
-    editor.scanInBufferRange new RegExp("//" + headerText + "//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
+    editor.scanInBufferRange new RegExp("//#{headerText}//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
       result.stop()
       editor.scanInBufferRange new RegExp("//End//", 'g'), [result.range.end,editor.getEofBufferPosition()], (footerResult) ->
         footerResult.stop()
@@ -287,7 +287,7 @@ module.exports =
             @createNote(innerNote, todoStrMin)
       else
         editor.moveToEndOfLine()
-        editor.insertText(" `(" + noteTime + ")")
+        editor.insertText(" `(#{noteTime})")
         @openNoteFile().then =>
           @createNote(noteTime, todoStr)
     else

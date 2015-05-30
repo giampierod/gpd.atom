@@ -44,7 +44,10 @@
 //2015.05.27.10.57//
   #(Version 1.0) Buttons for Todos
 
-  - Add to Today
-  - New Todo
-  - Goto/Create Note
+  [ ] Add to Today
+  [ ] New Todo
+  [ ] Goto/Create Note
+    [ ] Need an svg for the note icon
+    [ ] Transform the svg into a fonticon
+    [ ] Create a CSS/LESS style that can be used to attach the fonticon to the note
 //End//

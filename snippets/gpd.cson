@@ -20,7 +20,7 @@ Description:
   '.source.GPD':{
     'boilerplate':{
       'prefix':'///'
-      'body':'//Today//\n//End//\n\n//Todo//\n    ${1:Todo} ${0}\n//End//\n\n//Closed//\n//End//'
+      'body':'//Todo//\n//End//\n\n//Backlog//\n    ${1:Todo} ${0}\n//End//\n\n//Closed//\n//End//'
     }
     'cost':{
       'prefix': '$'
