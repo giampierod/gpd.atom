@@ -1,0 +1,50 @@
+//2015.05.27.11.08//
+  #(Version 1.0) Add robustness in finding the current pomodoro task if it has moved
+
+  Scenarios:
+    - User moves it manually (hardest one to solve for)
+    - User uses one of the GPD shortcuts to move the todo
+//End//
+
+//2015.05.27.11.02//
+  #(Version 1.0) Pretty formatting
+
+  Not sure what to do here yet, but I am thinking of things like:
+   - Pretty format completion dates
+   - Hide the "End" footers
+   - Hide the double slash on headers
+   - Pretty format the project hashtags and make them clickable (not sure what
+     the clicking will do yet.)
+   - Change the note marker on a Todo to be just a clickable item without the
+   text (see Buttons feature)
+//End//
+
+//2015.05.27.11.01//
+  #(Version 1.0) Refactoring and unit tests
+
+  Time to be a good dev. There are a bunch of methods that are in todos.coffee
+  that need to be refactored out and wrapped with unit tests. I am at the point
+  where testing is fairly tedious and I miss things.
+//End//
+
+//2015.05.27.11.00//
+  #(Version 1.0) Change headers
+
+  Today --> TODO
+  TODO --> Backlog
+//End//
+
+//2015.05.27.10.59//
+  #(Version 1.0) Replacement for Notifications view
+
+  The atom.notifications object is too limited. I want to  use my own font icons
+  such as a tomato to display things.
+//End//
+
+//2015.05.27.10.57//
+  #(Version 1.0) Buttons for Todos
+
+  - Add to Today
+  - New Todo
+  - Goto/Create Note
+//End//

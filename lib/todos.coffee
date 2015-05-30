@@ -19,7 +19,7 @@ Description:
   and repeat GPD todos. Also commands for toggling the Notes view.
 ###
 _ = require 'underscore-plus'
-{CompositeDisposable} = require 'atom'
+{CompositeDisposable, Range} = require 'atom'
 {exec, child} = require 'child_process'
 moment = require 'moment'
 PomodoroTimer = require './pomodoro-timer'
@@ -291,34 +291,38 @@ module.exports =
         @openNoteFile().then =>
           @createNote(noteTime, todoStr)
     else
-      console.log("No notes for headers.")
+      atom.notifications.addError("No notes allowed for headers.")
     editor.setCursorBufferPosition(curPos)
 
   start: ->
-    console.log "pomodoro: start"
     restLength = atom.config.get 'gpd.restLengthMinutes'
     editor = atom.workspace.getActiveTextEditor()
     curLine = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
     endOfLine = editor.getCursorBufferPosition()
-    @todoRange = [[curLine.row,0],endOfLine]
-    @filename = atom.workspace.getActiveTextEditor().getBuffer().getUri()
-    editor.setSelectedBufferRange(@todoRange)
+    todoRange = [[curLine.row,0],endOfLine]
+    editor.setSelectedBufferRange(todoRange)
     todo = editor.getSelectedText()
-    timerObj = @timer
-    todo = todo.replace(/\$\([a-zA-Z0-9_/ ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '$()',
-    todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
-    todo = todo.replace(/`\([a-zA-Z0-9_\"\., ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '`()'
-    todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-    atom.notifications.addSuccess("Started: '#{todo}'", {icon: "clock"})
-    timerObj.start(todo)
-    @todo = todo
-    @newTodoTracker()
+    if !@isHeader(todo)
+      console.log "pomodoro: start"
+      @todoMarker = editor.markBufferRange(todoRange, invalidate: 'never')
+      @filename = atom.workspace.getActiveTextEditor().getBuffer().getUri()
+      timerObj = @timer
+      todo = todo.replace(/\$\([a-zA-Z0-9_/ ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '$()',
+      todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
+      todo = todo.replace(/`\([a-zA-Z0-9_\"\., ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '`()'
+      todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
+      atom.notifications.addSuccess("Started: '#{todo}'", {icon: "clock"})
+      timerObj.start(todo)
+      @todo = todo
+      @newTodoTracker()
+    else
+      atom.notifications.addError("No pomodoros allowed for headers.")
 
   newTodoTracker: ->
     editor = atom.workspace.getActiveTextEditor()
     if editor.getGrammar().scopeName == 'source.GPD'
-      range = @todoRange
+      range = @todoMarker.getBufferRange()
       found = false
       editor.scanInBufferRange /\$\([a-zA-Z0-9_/ ]*\)?/g, range, (result) ->
         result.stop()
@@ -331,20 +335,22 @@ module.exports =
         editor.moveLeft()
         editor.insertText('O')
       if !found
-        editor.setCursorBufferPosition([range[1].row, range[1].column])
+        editor.setCursorBufferPosition(range.end)
         editor.insertText(" $(O)")
       editor.moveToEndOfLine()
       endOfLine = editor.getCursorBufferPosition()
-      range = [range[0],endOfLine]
-      @todoRange = range
+      range = [range.start,endOfLine]
+      @todoMarker.destroy()
+      @todoMarker = editor.markBufferRange(range, invalidate: 'never')
 
   updateTodoTracker: (text) ->
-    range = @todoRange
+    range = @todoMarker.getBufferRange()
     atom.workspace.open(@filename).then ->
       editor = atom.workspace.getActiveTextEditor()
+      editor.setCursorBufferPosition(range.start)
       editor.moveToEndOfLine()
       endOfLine = editor.getCursorBufferPosition()
-      range = [range[0],endOfLine]
+      range = new Range(range.start,endOfLine)
       found = false
       editor.scanInBufferRange /\$\([a-zA-Z0-9_/ ]*\)?/g, range, (result) ->
         result.stop()
@@ -353,9 +359,10 @@ module.exports =
         if editor.getSelectedText() != ')'
           editor.moveRight()
           editor.insertText(')')
-          editor.setCursorBufferPosition([range[1].row, range[1].column])
+          editor.setCursorBufferPosition(endOfLine)
         else
-          editor.setCursorBufferPosition([range[1].row, range[1].column - 1])
+          editor.moveLeft()
+          console.log editor.getCursorBufferPosition()
         editor.selectLeft()
         selectedChar = editor.getSelectedText()
         if selectedChar == '/'
@@ -364,13 +371,13 @@ module.exports =
           editor.moveLeft()
         editor.insertText(text)
       if !found
-        editor.setCursorBufferPosition([range[1].row, range[1].column])
+        editor.setCursorBufferPosition(endOfLine)
         editor.insertText(" $(" + text + ")")
       editor.moveToEndOfLine()
       endOfLine = editor.getCursorBufferPosition()
-      range = [range[0],endOfLine]
-    @todoRange = range
-
+      range = [range.start,endOfLine]
+      @todoMarker.destroy()
+      @todoMarker = editor.markBufferRange(range, invalidate: 'never')
 
   abort: ->
     @timer.abort()
