@@ -37,21 +37,24 @@ module.exports =
       default: "YYYY-MM-DD hh:mm"
 
   activate: (state) ->
-    @subscriptions = new CompositeDisposable
+    bindings = {
+      'gpd:new-todo': => @new_todo()
+      'gpd:select-todo': => @select_todo()
+      'gpd:done-todo': => @done_todo()
+      'gpd:done-todo-and-repeat': => @done_todo_and_repeat()
+      'gpd:toggle-note': =>
+        editor = @get_editor()
+        editor.transact =>
+          switch editor.getGrammar().scopeName
+            when 'source.GPD_Note' then @open_todo()
+            when 'source.GPD' then @open_note()
+      'gpd:start_timer': => @start()
+      'gpd:abort_timer': => @abort()
+      'gpd:toggle-pomodoro': => @toggle_pomodoro()
+    }
 
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:new-todo': => @new_todo()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:select-todo': => @select_todo()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:done-todo': => @done_todo()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:done-todo-and-repeat': => @done_todo_and_repeat()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-note': =>
-      editor = @get_editor()
-      editor.transact =>
-        switch editor.getGrammar().scopeName
-          when 'source.GPD_Note' then @open_todo()
-          when 'source.GPD' then @open_note()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:start_timer': => @start()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:abort_timer': => @abort()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-pomodoro': => @toggle_pomodoro()
+    subscriptions = atom.commands.add 'atom-workspace', bindings
+
     @timer = new PomodoroTimer()
     @view = new PomodoroView(@timer)
     @timer.on 'finished', => @finish()
