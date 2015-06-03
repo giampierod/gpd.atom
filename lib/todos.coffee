@@ -42,12 +42,7 @@ module.exports =
       'gpd:select-todo': => @select_todo()
       'gpd:done-todo': => @done_todo()
       'gpd:done-todo-and-repeat': => @done_todo_and_repeat()
-      'gpd:toggle-note': =>
-        editor = @get_editor()
-        editor.transact =>
-          switch editor.getGrammar().scopeName
-            when 'source.GPD_Note' then @open_todo()
-            when 'source.GPD' then @open_note()
+      'gpd:toggle-note': => @toggle_note()
       'gpd:start_timer': => @start()
       'gpd:abort_timer': => @abort()
       'gpd:toggle-pomodoro': => @toggle_pomodoro()
@@ -66,6 +61,13 @@ module.exports =
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addLeftTile(item: @view, priority: 100)
+
+  toggle_note: ->
+    editor = @get_editor()
+    editor.transact =>
+      switch editor.getGrammar().scopeName
+        when 'source.GPD_Note' then @open_todo()
+        when 'source.GPD' then @open_note()
 
   toggle_pomodoro: ->
     @pomodoro_state == "STARTED" && @abort() || @start()
