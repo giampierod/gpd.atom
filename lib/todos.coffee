@@ -121,20 +121,18 @@ module.exports =
   create_todo: ->
     console.log("Creating todo")
     editor = @get_editor()
-    cur_line = editor.getCursorBufferPosition()
-    range = [[0,0], editor.getEofBufferPosition()]
-    header_regex = _.escapeRegExp(todo_header_string)
-    editor.scanInBufferRange new RegExp(header_regex, 'g'), range, (result) ->
+    regex = _.escapeRegExp(todo_header_string) \
+          + '[\\s\\S]*?' \  # match anything, including newlines (non-greedy)
+          + '\n' \
+          + _.escapeRegExp(footer_string)
+    regex = new RegExp(regex, 'g')
+    editor.scan regex, (result) ->
+      console.log(result)
       result.stop()
-      footer_regex = _.escapeRegExp(footer_string)
-      range = [result.range.end, editor.getEofBufferPosition()]
-      editor.scanInBufferRange new RegExp(footer_regex, 'g'), range, (footer_result) ->
-        footer_result.stop()
-        editor.setCursorBufferPosition(footer_result.range.start)
-        editor.moveLeft()
-        editor.insertNewline()
-        editor.moveToBeginningOfLine()
-        editor.insertText('  ')
+      editor.setCursorBufferPosition(result.range.end)
+      editor.moveToBeginningOfLine()
+      editor.moveLeft()
+      editor.insertNewline()
     return true
 
 
