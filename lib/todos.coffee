@@ -142,42 +142,7 @@ module.exports =
       editor.insertNewline()
     return true
 
-
-  add_to_todo: ->
-    editor = @get_editor()
-    cur_line = editor.getCursorBufferPosition()
-    editor.moveToEndOfLine()
-    end_of_line = editor.getCursorBufferPosition()
-    editor.setSelectedBufferRange([[cur_line.row,0],end_of_line])
-    todo = editor.getSelectedText()
-    if !@is_header(todo)
-      range = [[0,0], editor.getEofBufferPosition()]
-      header_regex = _.escapeRegExp(todo_header_string)
-      editor.scanInBufferRange new RegExp(header_regex, 'g'), range, (result) ->
-        result.stop()
-        footer_regex = _.escapeRegExp(footer_string)
-        range = [result.range.end, editor.getEofBufferPosition()]
-        editor.scanInBufferRange new RegExp(footer_regex, 'g'), range, (footer_result) ->
-          footer_result.stop()
-          editor.setCursorBufferPosition(footer_result.range.start)
-          editor.moveLeft()
-          editor.insertNewline()
-          editor.moveToBeginningOfLine()
-          todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
-          todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-          editor.insertText('  ')
-          editor.insertText(todo)
-          paste_line = editor.getCursorBufferPosition()
-          if paste_line.row < cur_line.row
-            editor.setCursorBufferPosition([cur_line.row + 1, 0])
-          else
-            editor.setCursorBufferPosition([cur_line.row, 0])
-      return true
-    else
-      console.log("Can't move section marker.")
-      editor.setCursorBufferPosition(cur_line)
-      return false
-
+  add_to_todo: -> @add_todo_to_section(@get_editor(), 'Todo')
 
   close_todo: ->
     date_format = atom.config.get 'gpd.dateFormat'
