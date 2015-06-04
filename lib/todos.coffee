@@ -88,35 +88,42 @@ module.exports =
 
   is_header: (text) -> RegExp('//(.*)//').test(text)
 
-  move_todo_to_section: (section, prefix) ->
-    editor = @get_editor()
-    cur_line = editor.getCursorBufferPosition()
+  add_todo_to_section: (editor, section, prefix) ->
+    orig_pos = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
-    end_of_line = editor.getCursorBufferPosition()
-    editor.setSelectedBufferRange([[cur_line.row,0],end_of_line])
+    editor.selectToBeginningOfLine()
     todo = editor.getSelectedText()
-    todo = todo.replace(/(^\s+|\s+$)/g,'')
     if @is_header(todo)
         console.log("Can't move section marker")
-        editor.setCursorBufferPosition(cur_line)
+        editor.setCursorBufferPosition(orig_pos)  # reset cursor position
         return false
     else
-      editor.delete()
-      editor.delete()
-      range = [[0,0], editor.getEofBufferPosition()]
       header_regex = _.escapeRegExp('//' + section + '//')
-      editor.scanInBufferRange new RegExp(header_regex, 'g'), range, (result) ->
+      editor.scan new RegExp(header_regex, 'g'), (result) ->
         result.stop()
         editor.setCursorBufferPosition(result.range.end)
         editor.insertNewline()
-        editor.moveToFirstCharacterOfLine()
-        editor.insertText('  ')
-        prefix && editor.insertText(prefix)
         editor.insertText(todo)
+        if prefix
+          editor.moveToFirstCharacterOfLine()
+          editor.insertText(prefix)
         paste_line = editor.getCursorBufferPosition()
-        rows_down = if paste_line.row < cur_line.row then 1 else 0
-        editor.setCursorBufferPosition( [cur_line.row + rows_down, 0] )
+        # If we insert a line above, text will be pushed down 1 line, meaning
+        # orig_pos will be off. Account for that:
+        lines_inserted_above = if paste_line.row < orig_pos.row then 1 else 0
+        editor.setCursorBufferPosition([orig_pos.row + lines_inserted_above, orig_pos.column])
       return true
+
+  delete_line: (editor) ->
+    editor.moveToEndOfLine()
+    editor.selectToBeginningOfLine()
+    editor.delete()  # delete line content
+    editor.delete()  # delete newline
+
+  move_todo_to_section: (section, prefix) ->
+    editor = @get_editor()
+    return @add_todo_to_section(editor, section, prefix) && \
+           @delete_line(editor)
 
   create_todo: ->
     console.log("Creating todo")
