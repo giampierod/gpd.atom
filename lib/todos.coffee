@@ -20,7 +20,6 @@ closed_header_string = '//Closed//'
 today_header_string = '//Today//'
 footer_string = '//End//'
 note_header_pattern = /`\(([a-zA-Z0-9_\"\., ]*)\)/
-playSounds: false
 
 module.exports =
   config:
