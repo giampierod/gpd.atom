@@ -14,7 +14,6 @@ moment = require 'moment'
 PomodoroTimer = require './pomodoro-timer'
 PomodoroView = require './pomodoro-view'
 
-
 todo_header_string = '//Todo//'
 closed_header_string = '//Closed//'
 today_header_string = '//Today//'
@@ -148,6 +147,7 @@ module.exports =
     closed_time = ("~(" + moment().format(date_format) + ") ")
     return @move_todo_to_section("Closed", closed_time)
 
+
   # Create a new note section with boilerplate text in the view supplied
   create_note: (note_time, todo_str) ->
     note_header = "//" + note_time + "//\n"
@@ -164,8 +164,6 @@ module.exports =
     @highlight_note([note_boiler_range.start, note_boiler_range.end])
     editor.setCursorBufferPosition([note_boiler_range.end.row-3, 4])
 
-
-
   # Fold the other notes, and unfold the selected not so the user can focus
   # on the note they are working on. Assumption that note_range is an array of
   # points with note_range[0] being the start and note_range[1] being the end.
@@ -175,7 +173,6 @@ module.exports =
     after_note = [note_range[1], editor.getBuffer().getEndPosition()]
     editor.setSelectedBufferRanges([before_note, after_note])
     editor.foldSelectedLines()
-
 
   # Find a note with the given header_text in the view
   find_note_header: (header_text) ->
@@ -194,14 +191,12 @@ module.exports =
         found = true
     return found
 
-
   note_exists: (text) ->
     if text.match(note_header_pattern) then return note_header_pattern.exec(text)[0] else return false
 
   open_note_file: ->
     filename = @get_editor().getBuffer().getUri() + "_Note"
     return atom.workspace.open(filename)
-
 
   open_todo: ->
     filename = @get_editor().getBuffer().getUri().replace('.GPD_Note','.GPD')
@@ -234,6 +229,7 @@ module.exports =
     else
       console.log("No notes for headers.")
     editor.setCursorBufferPosition(cur_pos)
+
 
   start: ->
     console.log "pomodoro: start"
@@ -335,6 +331,7 @@ module.exports =
     atom.focus()
     atom.notifications.addSuccess("🍅 #{@todo} Work Completed. Start Resting.")
     @timer.start_rest()
+
 
   exec: (path) ->
     if path
