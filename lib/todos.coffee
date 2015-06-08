@@ -204,10 +204,8 @@ module.exports =
 
 
   open_todo: ->
-    editor = @get_editor()
-    editor.transact ->
-      filename = editor.getBuffer().getUri().replace('.GPD_Note','.GPD')
-      return atom.workspace.open(filename)
+    filename = @get_editor().getBuffer().getUri().replace('.GPD_Note','.GPD')
+    return atom.workspace.open(filename)
 
   open_note: ->
     editor = @get_editor()
