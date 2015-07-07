@@ -1,30 +1,18 @@
 ###
-Copyright 2015 Giampiero De Ciantis
+Copyright 2014 Giampiero De Ciantis. The license text can be found in the
+`LICENSE` file provided with this project.'
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
-Filename: /lib/todos.coffee
 Description:
   All logic for commands in gpd.atom. These commands can create, move, complete,
   and repeat GPD todos. Also commands for toggling the Notes view.
 ###
+
 _ = require 'underscore-plus'
 {CompositeDisposable, Range} = require 'atom'
 {exec, child} = require 'child_process'
 moment = require 'moment'
 PomodoroTimer = require './pomodoro-timer'
 PomodoroView = require './pomodoro-view'
-
 
 todoHeaderString = '//Backlog//'
 closedHeaderString = '//Closed//'
@@ -47,30 +35,31 @@ module.exports =
       type: 'integer'
       default: '15'
       minimum: '5'
+    dateFormat:
+      type: 'string'
+      default: "YYYY-MM-DD hh:mm"
 
   activate: (state) ->
-    @subscriptions = new CompositeDisposable
+    bindings = {
+      'gpd:new-todo': => @newTodo()
+      'gpd:select-todo': => @selectTodo()
+      'gpd:done-todo': => @doneTodo()
+      'gpd:done-todo-and-repeat': => @doneTodoAndRepeat()
+      'gpd:toggle-note': => @toggleNote()
+      'gpd:start_timer': => @start()
+      'gpd:abort_timer': => @abort()
+      'gpd:toggle-pomodoro': => @togglePomodoro()
+    }
 
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:new-todo': => @newTodo()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:select-todo': => @selectTodo()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:done-todo': => @doneTodo()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:done-todo-and-repeat': => @doneTodoAndRepeat()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-note': =>
-      editor = atom.workspace.getActiveTextEditor()
-      editor.transact =>
-        if editor.getGrammar().scopeName == 'source.GPD_Note'
-          @openTodo()
-        else if editor.getGrammar().scopeName == 'source.GPD'
-          @openNote()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:start-timer': => @start()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:abort-timer': => @abort()
-    @subscriptions.add atom.commands.add 'atom-workspace', 'gpd:toggle-pomodoro': => @togglePomodoro()
+    subscriptions = atom.commands.add 'atom-workspace', bindings
     @timer = new PomodoroTimer()
     @view = new PomodoroView(@timer)
     @timer.on 'finished', => @finish()
     @timer.on 'rest', => @startRest()
     @timer.on 'start', =>
       @pomodoroState = "STARTED"
+
+  getEditor: -> atom.workspace.getActiveTextEditor()
 
   consumeStatusBar: (statusBar) ->
     @statusBarTile = statusBar.addLeftTile(item: @view, priority: 100)
@@ -81,74 +70,122 @@ module.exports =
     else
       @start()
 
-  selectTodo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
+  toggleNote: ->
+    editor = @getEditor()
     editor.transact =>
-      if !@moveTodoToSection('Todo')
-        editor.abortTransaction()
+      switch editor.getGrammar().scopeName
+        when 'source.gpd_note' then @openTodo()
+        when 'source.gpd' then @openNote()
 
-  doneTodo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !@closeTodo()
-        editor.abortTransaction()
+  attempt: (fn) ->
+    editor = @getEditor()
+    if editor.getGrammar().scopeName == 'source.gpd'
+      editor.transact =>
+        if !fn.call(@) then editor.abortTransaction()
 
-  newTodo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !@createTodo()
-        editor.abortTransaction()
+  selectTodo: -> @attempt(-> @moveTodoToTopOfSection 'Todo')
 
-  doneTodoAndRepeat: ->
-    editor = atom.workspace.getActiveTextEditor()
-    return unless editor.getGrammar().scopeName == 'source.GPD'
-    editor.transact =>
-      if !@addToTodo() || !@closeTodo()
-        editor.abortTransaction()
+  doneTodo: -> @attempt(@closeTodo)
+
+  newTodo: -> @attempt(@createTodo)
+
+  doneTodoAndRepeat: -> @attempt(-> @addToTodo() && @closeTodo())
 
   isHeader: (text) ->
     headerPattern = new RegExp('//(.*)//')
     headerPattern.test(text)
 
-  moveTodoToSection: (section, prefix) ->
-    editor = atom.workspace.getActiveTextEditor()
-    curLine = editor.getCursorBufferPosition()
+  deleteLine: ->
+    editor = @getEditor()
+    editor.moveToEndOfLine()
+    editor.selectToBeginningOfLine()
+    editor.delete()  # delete line content
+    editor.delete()  # delete newline
+
+  selectCurrentLine: ->
+    editor = @getEditor()
+    origPos = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
     endOfLine = editor.getCursorBufferPosition()
-    editor.setSelectedBufferRange([[curLine.row,0],endOfLine])
+    editor.setSelectedBufferRange([[origPos.row,0],endOfLine])
     todo = editor.getSelectedText()
-    todo = todo.replace(/(^\s+|\s+$)/g,'')
-    if !@isHeader(editor.getSelectedText())
-      editor.delete()
-      editor.delete()
-      range = [[0,0], editor.getEofBufferPosition()]
-      headerRegex = _.escapeRegExp('//' + section + '//')
-      editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
-        result.stop()
-        editor.setCursorBufferPosition(result.range.end)
-        editor.insertNewline()
-        editor.moveToBeginningOfLine()
-        editor.insertText('  ')
-        if typeof prefix != 'undefined'
-          editor.insertText(prefix)
-        editor.insertText(todo)
-        pasteLine = editor.getCursorBufferPosition()
-        if pasteLine.row < curLine.row
-          editor.setCursorBufferPosition([curLine.row + 1, 0])
-        else
-          editor.setCursorBufferPosition([curLine.row, 0])
-      return true
-    else
-      console.log("Can't move section marker")
-      editor.setCursorBufferPosition(curLine)
-      return false
+    return { 'text': todo, 'position': origPos}
+
+  moveTodoToTopOfSection: (section, prefix) ->
+     editor = @getEditor()
+     line = @selectCurrentLine()
+     todo = line.text.replace(/(^\s+|\s+$)/g,'') # Trim
+     if !@isHeader(todo)
+       @deleteLine()
+       @moveCursorToSectionHeader(section)
+       editor.insertNewline()
+       editor.moveToBeginningOfLine()
+       editor.insertText('  ')
+       if typeof prefix != 'undefined'
+         editor.insertText(prefix)
+       editor.insertText(todo)
+       pasteLine = editor.getCursorBufferPosition()
+       # If we insert a line above, text will be pushed down 1 line, meaning
+       # line.position will be off. Account for that:
+       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
+       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
+     else
+       console.log("Can't move section marker")
+       editor.setCursorBufferPosition(line.position)
+       return false
+
+  moveTodoToBottomOfSection: (section, prefix) ->
+     editor = @getEditor()
+     line = @selectCurrentLine()
+     todo = line.text
+     if !@isHeader(todo)
+       @moveCursorToSectionFooter(section)
+       console.log(editor.getCursorBufferPosition())
+       editor.moveLeft()
+       editor.insertNewline()
+       editor.moveToBeginningOfLine()
+       todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
+       todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
+       editor.insertText('  ')
+       editor.insertText(todo)
+       pasteLine = editor.getCursorBufferPosition()
+       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
+       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
+       return true
+     else
+       console.log("Can't move section marker.")
+       editor.setCursorBufferPosition(line.position)
+       return false
+
+  moveCursorToSectionHeader: (section) ->
+    editor = @getEditor()
+    range = [[0,0], editor.getEofBufferPosition()]
+    headerRegex = _.escapeRegExp('//' + section + '//')
+    headerPos = editor.getEofBufferPosition()
+    editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
+      result.stop()
+      editor.setCursorBufferPosition(result.range.end)
+      headerPos = result.range.end
+    return headerPos
+
+  moveCursorToSectionFooter: (section) ->
+    editor = @getEditor()
+    headerPos = @moveCursorToSectionHeader(section)
+    console.log(headerPos)
+    range = [headerPos, editor.getEofBufferPosition()]
+    footerRegex = _.escapeRegExp(footerString)
+    footerPos = editor.getEofBufferPosition()
+    editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (footerResult) ->
+      footerResult.stop()
+      editor.setCursorBufferPosition(footerResult.range.start)
+      footerPos = footerResult.range.start
+    return footerPos
+
+  addToTodo: -> @moveTodoToBottomOfSection('Backlog')
 
   createTodo: ->
     console.log("Creating todo")
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @getEditor()
     curLine = editor.getCursorBufferPosition()
     range = [[0,0], editor.getEofBufferPosition()]
     headerRegex = _.escapeRegExp(todoHeaderString)
@@ -165,60 +202,18 @@ module.exports =
         editor.insertText('  ')
     return true
 
-
-  addToTodo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    curLine = editor.getCursorBufferPosition()
-    editor.moveToEndOfLine()
-    endOfLine = editor.getCursorBufferPosition()
-    editor.setSelectedBufferRange([[curLine.row,0],endOfLine])
-    todo = editor.getSelectedText()
-    if !@isHeader(todo)
-      range = [[0,0], editor.getEofBufferPosition()]
-      headerRegex = _.escapeRegExp(todoHeaderString)
-      editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
-        result.stop()
-        footerRegex = _.escapeRegExp(footerString)
-        range = [result.range.end, editor.getEofBufferPosition()]
-        editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (footerResult) ->
-          footerResult.stop()
-          editor.setCursorBufferPosition(footerResult.range.start)
-          editor.moveLeft()
-          editor.insertNewline()
-          editor.moveToBeginningOfLine()
-          todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
-          todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-          editor.insertText('  ')
-          editor.insertText(todo)
-          pasteLine = editor.getCursorBufferPosition()
-          if pasteLine.row < curLine.row
-            editor.setCursorBufferPosition([curLine.row + 1, 0])
-          else
-            editor.setCursorBufferPosition([curLine.row, 0])
-      return true
-    else
-      console.log("Can't move section marker.")
-      editor.setCursorBufferPosition(curLine)
-      return false
-
-
   closeTodo: ->
-    closedTime = ("~(#{moment().format("DD/MM/YY hh:mm")}) ")
-    return @moveTodoToSection("Closed", closedTime)
+    closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
+    return @moveTodoToTopOfSection("Closed", closedTime)
 
   # Create a new note section with boilerplate text in the view supplied
   createNote: (noteTime, todoStr) ->
     noteHeader = "//" + noteTime + "//\n"
     noteFooter = "//End//\n\n"
     noteBoilerStr = (noteHeader + "  " + todoStr + "\n\n  \n"+ noteFooter)
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @getEditor()
     editor.unfoldAll()
     noteBoilerRange = editor.getBuffer().insert([0,0], noteBoilerStr)
-    # Need to convert to array of points because I cannot seem to create a Range
-    # object in other parts of the code, and the highlightNote code assumes that
-    # noteRange is an array of points with noteRange[0] being the start
-    # and noteRange[1] being the end. However, the range object does not
-    # guarantee that.
     @highlightNote([noteBoilerRange.start, noteBoilerRange.end])
     editor.setCursorBufferPosition([noteBoilerRange.end.row-3, 4])
 
@@ -228,7 +223,7 @@ module.exports =
   # on the note they are working on. Assumption that noteRange is an array of
   # points with noteRange[0] being the start and noteRange[1] being the end.
   highlightNote: (noteRange) ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @getEditor()
     beforeNote = [[0, 0], [noteRange[0].row, 0]]
     afterNote = [noteRange[1], editor.getBuffer().getEndPosition()]
     editor.setSelectedBufferRanges([beforeNote, afterNote])
@@ -237,7 +232,7 @@ module.exports =
 
   # Find a note with the given headerText in the view
   findNoteHeader: (headerText) ->
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @getEditor()
     me = @
     found = false
     editor.unfoldAll()
@@ -257,18 +252,17 @@ module.exports =
     if text.match(noteHeaderPattern) then return noteHeaderPattern.exec(text)[0] else return false
 
   openNoteFile: ->
-    filename = atom.workspace.getActiveTextEditor().getBuffer().getUri() + "_Note"
+    filename = @getEditor().getBuffer().getUri() + "_note"
     return atom.workspace.open(filename)
 
-
   openTodo: ->
-    editor = atom.workspace.getActiveTextEditor()
-    editor.transact ->
-      filename = atom.workspace.getActiveTextEditor().getBuffer().getUri().replace('.GPD_Note','.GPD')
-      return atom.workspace.open(filename)
+    console.log("Open Todo")
+    filename = @getEditor().getBuffer().getUri().replace('.gpd_note','.gpd')
+    return atom.workspace.open(filename)
 
   openNote: ->
-    editor = atom.workspace.getActiveTextEditor()
+    console.log("Open Note")
+    editor = @getEditor()
     curPos = editor.getCursorBufferPosition()
     noteTime =  moment().format("YYYY.MM.DD.hh.mm")
     editor.moveToEndOfLine()
@@ -296,7 +290,7 @@ module.exports =
 
   start: ->
     restLength = atom.config.get 'gpd.restLengthMinutes'
-    editor = atom.workspace.getActiveTextEditor()
+    editor = @getEditor()
     curLine = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
     endOfLine = editor.getCursorBufferPosition()
@@ -306,7 +300,7 @@ module.exports =
     if !@isHeader(todo)
       console.log "pomodoro: start"
       @todoMarker = editor.markBufferRange(todoRange, invalidate: 'never')
-      @filename = atom.workspace.getActiveTextEditor().getBuffer().getUri()
+      @filename = @getEditor().getBuffer().getUri()
       timerObj = @timer
       todo = todo.replace(/\$\([a-zA-Z0-9_/ ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '$()',
       todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
@@ -320,8 +314,8 @@ module.exports =
       atom.notifications.addError("No pomodoros allowed for headers.")
 
   newTodoTracker: ->
-    editor = atom.workspace.getActiveTextEditor()
-    if editor.getGrammar().scopeName == 'source.GPD'
+    editor = @getEditor()
+    if editor.getGrammar().scopeName == 'source.gpd'
       range = @todoMarker.getBufferRange()
       found = false
       editor.scanInBufferRange /\$\([a-zA-Z0-9_/ ]*\)?/g, range, (result) ->
@@ -344,16 +338,21 @@ module.exports =
       @todoMarker = editor.markBufferRange(range, invalidate: 'never')
 
   updateTodoTracker: (text) ->
+    console.log("updated todo tracker")
     range = @todoMarker.getBufferRange()
+    me = @
     atom.workspace.open(@filename).then ->
-      editor = atom.workspace.getActiveTextEditor()
+      editor = me.getEditor()
+      console.log(editor)
       editor.setCursorBufferPosition(range.start)
       editor.moveToEndOfLine()
       endOfLine = editor.getCursorBufferPosition()
       range = new Range(range.start,endOfLine)
+      console.log(range)
       found = false
       editor.scanInBufferRange /\$\([a-zA-Z0-9_/ ]*\)?/g, range, (result) ->
         result.stop()
+        console.log("tracker found")
         found = true
         editor.selectLeft()
         if editor.getSelectedText() != ')'
