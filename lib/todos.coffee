@@ -89,7 +89,7 @@ module.exports =
 
   newTodo: -> @attempt(@createTodo)
 
-  doneTodoAndRepeat: -> @attempt(-> @addToTodo() && @closeTodo())
+  doneTodoAndRepeat: -> @attempt(-> @addToBacklog && @closeTodo())
 
   isHeader: (text) ->
     headerPattern = new RegExp('//(.*)//')
@@ -181,7 +181,7 @@ module.exports =
       footerPos = footerResult.range.start
     return footerPos
 
-  addToTodo: -> @moveTodoToBottomOfSection('Backlog')
+  addToBacklog: -> @moveTodoToBottomOfSection('Backlog')
 
   createTodo: ->
     console.log("Creating todo")
