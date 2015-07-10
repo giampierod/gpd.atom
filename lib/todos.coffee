@@ -115,7 +115,7 @@ module.exports =
      todo = line.text.replace(/(^\s+|\s+$)/g,'') # Trim
      if !@isHeader(todo)
        @deleteLine()
-       @moveCursorToSectionHeader(section)
+       @moveCursorToSection(editor, section)
        editor.insertNewline()
        editor.moveToBeginningOfLine()
        editor.insertText('  ')
@@ -137,7 +137,7 @@ module.exports =
      line = @selectCurrentLine(editor)
      todo = line.text
      if !@isHeader(todo)
-       @moveCursorToSectionFooter(section)
+       @moveCursorToSection(editor, section, 'footer')
        console.log(editor.getCursorBufferPosition())
        editor.moveLeft()
        editor.insertNewline()
@@ -155,29 +155,21 @@ module.exports =
        editor.setCursorBufferPosition(line.position)
        return false
 
-  moveCursorToSectionHeader: (section) ->
-    editor = @getEditor()
-    range = [[0,0], editor.getEofBufferPosition()]
+  moveCursorToSection: (editor, section, footer) ->
     headerRegex = _.escapeRegExp('//' + section + '//')
-    headerPos = editor.getEofBufferPosition()
-    editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
+    editor.scan new RegExp(headerRegex, 'g'), (result) ->
       result.stop()
-      editor.setCursorBufferPosition(result.range.end)
-      headerPos = result.range.end
-    return headerPos
+      if footer
+        moveCursorToEnd(editor, result.range.end)
+      else
+        editor.setCursorBufferPosition(result.range.end)
 
-  moveCursorToSectionFooter: (section) ->
-    editor = @getEditor()
-    headerPos = @moveCursorToSectionHeader(section)
-    console.log(headerPos)
-    range = [headerPos, editor.getEofBufferPosition()]
-    footerRegex = _.escapeRegExp(footerString)
-    footerPos = editor.getEofBufferPosition()
-    editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (footerResult) ->
-      footerResult.stop()
-      editor.setCursorBufferPosition(footerResult.range.start)
-      footerPos = footerResult.range.start
-    return footerPos
+  moveCursorToEnd: (editor, position) ->
+      footerRegex = _.escapeRegExp(footerString)
+      range = [position, editor.getEofBufferPosition()]
+      editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (result) ->
+        result.stop()
+        editor.setCursorBufferPosition(result.range.start)
 
   addToBacklog: -> @moveTodoToBottomOfSection('Backlog')
 
