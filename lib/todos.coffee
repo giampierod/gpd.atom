@@ -102,18 +102,16 @@ module.exports =
     editor.delete()  # delete line content
     editor.delete()  # delete newline
 
-  selectCurrentLine: ->
-    editor = @getEditor()
+  selectCurrentLine: (editor) ->
     origPos = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
-    endOfLine = editor.getCursorBufferPosition()
-    editor.setSelectedBufferRange([[origPos.row,0],endOfLine])
+    editor.selectToBeginningOfLine()
     todo = editor.getSelectedText()
     return { 'text': todo, 'position': origPos}
 
   moveTodoToTopOfSection: (section, prefix) ->
      editor = @getEditor()
-     line = @selectCurrentLine()
+     line = @selectCurrentLine(editor)
      todo = line.text.replace(/(^\s+|\s+$)/g,'') # Trim
      if !@isHeader(todo)
        @deleteLine()
@@ -136,7 +134,7 @@ module.exports =
 
   moveTodoToBottomOfSection: (section, prefix) ->
      editor = @getEditor()
-     line = @selectCurrentLine()
+     line = @selectCurrentLine(editor)
      todo = line.text
      if !@isHeader(todo)
        @moveCursorToSectionFooter(section)
