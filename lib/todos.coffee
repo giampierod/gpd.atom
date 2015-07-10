@@ -109,54 +109,34 @@ module.exports =
     todo = editor.getSelectedText()
     return { 'text': todo, 'position': origPos}
 
-  moveTodoToTopOfSection: (section, prefix) ->
-     editor = @getEditor()
-     line = @selectCurrentLine(editor)
-     todo = line.text.replace(/(^\s+|\s+$)/g,'') # Trim
-     if !@isHeader(todo)
-       @deleteLine()
-       @moveCursorToSection(editor, section)
-       editor.insertNewline()
-       editor.moveToBeginningOfLine()
-       editor.insertText('  ')
-       if typeof prefix != 'undefined'
-         editor.insertText(prefix)
-       editor.insertText(todo)
-       pasteLine = editor.getCursorBufferPosition()
-       # If we insert a line above, text will be pushed down 1 line, meaning
-       # line.position will be off. Account for that:
-       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
-       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
-     else
-       console.log("Can't move section marker")
-       editor.setCursorBufferPosition(line.position)
-       return false
+  moveTodoToTopOfSection: (section, prefix) -> @moveTodoToSection(section, false, prefix)
+  moveTodoToBottomOfSection: (section, prefix) -> @moveTodoToSection(section, true, prefix)
 
-  moveTodoToBottomOfSection: (section, prefix) ->
-     editor = @getEditor()
-     line = @selectCurrentLine(editor)
-     todo = line.text
-     if !@isHeader(todo)
-       @moveCursorToSection(editor, section, 'footer')
-       console.log(editor.getCursorBufferPosition())
-       editor.moveLeft()
-       editor.insertNewline()
-       editor.moveToBeginningOfLine()
-       todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
-       todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-       editor.insertText('  ')
-       editor.insertText(todo)
-       pasteLine = editor.getCursorBufferPosition()
-       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
-       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
-       return true
-     else
-       console.log("Can't move section marker.")
-       editor.setCursorBufferPosition(line.position)
-       return false
+  moveTodoToSection: (section, bottom, prefix) ->
+    editor = @getEditor()
+    line = @selectCurrentLine(editor)
+    if !@isHeader(line.text)
+      @deleteLine()
+      if bottom
+        @moveCursorToSection(editor, section, 'footer')
+        editor.moveLeft()
+      else
+        @moveCursorToSection(editor, section)
+      editor.insertNewline()
+      editor.insertText(line.text)
+      if prefix  # Unless prefix is undefined or empty in any way:
+        editor.moveToFirstCharacterOfLine()
+        editor.insertText(prefix)
+      pasteLine = editor.getCursorBufferPosition()
+      # If we insert a line above, text will be pushed down 1 line, meaning
+      # line.position will be off. Account for that:
+      linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
+      editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
+      return true
 
   moveCursorToSection: (editor, section, footer) ->
     headerRegex = _.escapeRegExp('//' + section + '//')
+    moveCursorToEnd = @moveCursorToEnd  # `editor.scan` rebinds `@`
     editor.scan new RegExp(headerRegex, 'g'), (result) ->
       result.stop()
       if footer
@@ -165,11 +145,11 @@ module.exports =
         editor.setCursorBufferPosition(result.range.end)
 
   moveCursorToEnd: (editor, position) ->
-      footerRegex = _.escapeRegExp(footerString)
-      range = [position, editor.getEofBufferPosition()]
-      editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (result) ->
-        result.stop()
-        editor.setCursorBufferPosition(result.range.start)
+    footerRegex = _.escapeRegExp(footerString)
+    range = [position, editor.getEofBufferPosition()]
+    editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (result) ->
+      result.stop()
+      editor.setCursorBufferPosition(result.range.start)
 
   addToBacklog: -> @moveTodoToBottomOfSection('Backlog')
 
