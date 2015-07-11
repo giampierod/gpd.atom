@@ -154,22 +154,9 @@ module.exports =
   addToBacklog: -> @moveTodoToBottomOfSection('Backlog')
 
   createTodo: ->
-    console.log("Creating todo")
     editor = @getEditor()
-    curLine = editor.getCursorBufferPosition()
-    range = [[0,0], editor.getEofBufferPosition()]
-    headerRegex = _.escapeRegExp(todoHeaderString)
-    editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
-      result.stop()
-      footerRegex = _.escapeRegExp(footerString)
-      range = [result.range.end, editor.getEofBufferPosition()]
-      editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (footerResult) ->
-        footerResult.stop()
-        editor.setCursorBufferPosition(footerResult.range.start)
-        editor.moveLeft()
-        editor.insertNewline()
-        editor.moveToBeginningOfLine()
-        editor.insertText('  ')
+    @moveCursorToSection(editor, 'Backlog', 'footer')
+    editor.insertNewlineAbove()
     return true
 
   closeTodo: ->
