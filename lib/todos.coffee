@@ -89,7 +89,13 @@ module.exports =
 
   newTodo: -> @attempt(@createTodo)
 
-  doneTodoAndRepeat: -> @attempt(-> @addToBacklog() && @closeTodo())
+  doneTodoAndRepeat: ->
+    @attempt( ->
+      closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
+      @copyTodoToSection('Closed', closedTime)
+      @removeTag('$')
+      @moveTodoToSection('Backlog', 'bottom')
+    )
 
   isHeader: (text) ->
     headerPattern = new RegExp('//(.*)//')
@@ -143,6 +149,14 @@ module.exports =
     editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (result) ->
       result.stop()
       editor.setCursorBufferPosition(result.range.start)
+
+  removeTag: (tagIndicator) ->
+    editor = @getEditor()
+    line = @selectCurrentLine(editor)
+    regex = _.escapeRegExp(tagIndicator) + "\\(.*?\\)[ ]?"
+    lineWithoutTag = line.text.replace(new RegExp(regex, 'g'), '')
+    editor.insertText(lineWithoutTag)
+    return true
 
   addToBacklog: -> @copyTodoToSection('Backlog', 'bottom')
 
