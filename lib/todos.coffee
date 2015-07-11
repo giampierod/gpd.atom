@@ -95,13 +95,6 @@ module.exports =
     headerPattern = new RegExp('//(.*)//')
     headerPattern.test(text)
 
-  deleteLine: ->
-    editor = @getEditor()
-    editor.moveToEndOfLine()
-    editor.selectToBeginningOfLine()
-    editor.delete()  # delete line content
-    editor.delete()  # delete newline
-
   selectCurrentLine: (editor) ->
     origPos = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
@@ -111,7 +104,7 @@ module.exports =
 
   moveTodoToSection: (section, bottom, prefix) ->
     @copyTodoToSection(section, bottom, prefix)
-    @deleteLine()
+    @getEditor().deleteLine()
 
   copyTodoToSection: (section, bottom, prefix) ->
     editor = @getEditor()
