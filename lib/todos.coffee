@@ -89,7 +89,7 @@ module.exports =
 
   newTodo: -> @attempt(@createTodo)
 
-  doneTodoAndRepeat: -> @attempt(-> @addToBacklog && @closeTodo())
+  doneTodoAndRepeat: -> @attempt(-> @addToBacklog() && @closeTodo())
 
   isHeader: (text) ->
     headerPattern = new RegExp('//(.*)//')
