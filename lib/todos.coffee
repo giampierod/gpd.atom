@@ -113,10 +113,13 @@ module.exports =
   moveTodoToBottomOfSection: (section, prefix) -> @moveTodoToSection(section, true, prefix)
 
   moveTodoToSection: (section, bottom, prefix) ->
+    @copyTodoToSection(section, bottom, prefix)
+    @deleteLine()
+
+  copyTodoToSection: (section, bottom, prefix) ->
     editor = @getEditor()
     line = @selectCurrentLine(editor)
     if !@isHeader(line.text)
-      @deleteLine()
       if bottom
         @moveCursorToSection(editor, section, 'footer')
         editor.moveLeft()
@@ -151,7 +154,7 @@ module.exports =
       result.stop()
       editor.setCursorBufferPosition(result.range.start)
 
-  addToBacklog: -> @moveTodoToBottomOfSection('Backlog')
+  addToBacklog: -> @copyTodoToSection('Backlog', 'bottom')
 
   createTodo: ->
     editor = @getEditor()
