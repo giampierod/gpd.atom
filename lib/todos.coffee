@@ -83,7 +83,7 @@ module.exports =
       editor.transact =>
         if !fn.call(@) then editor.abortTransaction()
 
-  selectTodo: -> @attempt(-> @moveTodoToTopOfSection 'Todo')
+  selectTodo: -> @attempt(-> @moveTodoToSection 'Todo')
 
   doneTodo: -> @attempt(@closeTodo)
 
@@ -108,9 +108,6 @@ module.exports =
     editor.selectToBeginningOfLine()
     todo = editor.getSelectedText()
     return { 'text': todo, 'position': origPos}
-
-  moveTodoToTopOfSection: (section, prefix) -> @moveTodoToSection(section, false, prefix)
-  moveTodoToBottomOfSection: (section, prefix) -> @moveTodoToSection(section, true, prefix)
 
   moveTodoToSection: (section, bottom, prefix) ->
     @copyTodoToSection(section, bottom, prefix)
@@ -164,7 +161,7 @@ module.exports =
 
   closeTodo: ->
     closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
-    return @moveTodoToTopOfSection("Closed", closedTime)
+    return @moveTodoToSection("Closed", closedTime)
 
   # Create a new note section with boilerplate text in the view supplied
   createNote: (noteTime, todoStr) ->
