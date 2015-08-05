@@ -83,128 +83,92 @@ module.exports =
       editor.transact =>
         if !fn.call(@) then editor.abortTransaction()
 
-  selectTodo: -> @attempt(-> @moveTodoToTopOfSection 'Todo')
+  selectTodo: -> @attempt(-> @moveTodoToSection 'Todo')
 
   doneTodo: -> @attempt(@closeTodo)
 
   newTodo: -> @attempt(@createTodo)
 
-  doneTodoAndRepeat: -> @attempt(-> @addToTodo() && @closeTodo())
+  doneTodoAndRepeat: ->
+    @attempt( ->
+      closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
+      @copyTodoToSection('Closed', closedTime)
+      @removeTag('$')
+      @moveTodoToSection('Backlog', 'bottom')
+    )
 
   isHeader: (text) ->
     headerPattern = new RegExp('//(.*)//')
     headerPattern.test(text)
 
-  deleteLine: ->
-    editor = @getEditor()
-    editor.moveToEndOfLine()
-    editor.selectToBeginningOfLine()
-    editor.delete()  # delete line content
-    editor.delete()  # delete newline
-
-  selectCurrentLine: ->
-    editor = @getEditor()
+  selectCurrentLine: (editor) ->
     origPos = editor.getCursorBufferPosition()
     editor.moveToEndOfLine()
-    endOfLine = editor.getCursorBufferPosition()
-    editor.setSelectedBufferRange([[origPos.row,0],endOfLine])
+    editor.selectToBeginningOfLine()
     todo = editor.getSelectedText()
     return { 'text': todo, 'position': origPos}
 
-  moveTodoToTopOfSection: (section, prefix) ->
-     editor = @getEditor()
-     line = @selectCurrentLine()
-     todo = line.text.replace(/(^\s+|\s+$)/g,'') # Trim
-     if !@isHeader(todo)
-       @deleteLine()
-       @moveCursorToSectionHeader(section)
-       editor.insertNewline()
-       editor.moveToBeginningOfLine()
-       editor.insertText('  ')
-       if typeof prefix != 'undefined'
-         editor.insertText(prefix)
-       editor.insertText(todo)
-       pasteLine = editor.getCursorBufferPosition()
-       # If we insert a line above, text will be pushed down 1 line, meaning
-       # line.position will be off. Account for that:
-       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
-       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
-     else
-       console.log("Can't move section marker")
-       editor.setCursorBufferPosition(line.position)
-       return false
+  moveTodoToSection: (section, bottom, prefix) ->
+    @copyTodoToSection(section, bottom, prefix)
+    @getEditor().deleteLine()
 
-  moveTodoToBottomOfSection: (section, prefix) ->
-     editor = @getEditor()
-     line = @selectCurrentLine()
-     todo = line.text
-     if !@isHeader(todo)
-       @moveCursorToSectionFooter(section)
-       console.log(editor.getCursorBufferPosition())
-       editor.moveLeft()
-       editor.insertNewline()
-       editor.moveToBeginningOfLine()
-       todo = todo.replace(/\$\([a-zA-Z0-9_ ]*\)[ ]?/g, '') # Strip out the time spent marker, '$()', since we are repeating
-       todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
-       editor.insertText('  ')
-       editor.insertText(todo)
-       pasteLine = editor.getCursorBufferPosition()
-       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
-       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
-       return true
-     else
-       console.log("Can't move section marker.")
-       editor.setCursorBufferPosition(line.position)
-       return false
-
-  moveCursorToSectionHeader: (section) ->
+  copyTodoToSection: (section, bottom, prefix) ->
     editor = @getEditor()
-    range = [[0,0], editor.getEofBufferPosition()]
+    line = @selectCurrentLine(editor)
+    if !@isHeader(line.text)
+      if bottom
+        @moveCursorToSection(editor, section, 'footer')
+        editor.moveLeft()
+      else
+        @moveCursorToSection(editor, section)
+      editor.insertNewline()
+      editor.insertText(line.text)
+      if prefix  # Unless prefix is undefined or empty in any way:
+        editor.moveToFirstCharacterOfLine()
+        editor.insertText(prefix)
+      pasteLine = editor.getCursorBufferPosition()
+      # If we insert a line above, text will be pushed down 1 line, meaning
+      # line.position will be off. Account for that:
+      linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
+      editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
+      return true
+
+  moveCursorToSection: (editor, section, footer) ->
     headerRegex = _.escapeRegExp('//' + section + '//')
-    headerPos = editor.getEofBufferPosition()
-    editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
+    moveCursorToEnd = @moveCursorToEnd  # `editor.scan` rebinds `@`
+    editor.scan new RegExp(headerRegex, 'g'), (result) ->
       result.stop()
-      editor.setCursorBufferPosition(result.range.end)
-      headerPos = result.range.end
-    return headerPos
+      if footer
+        moveCursorToEnd(editor, result.range.end)
+      else
+        editor.setCursorBufferPosition(result.range.end)
 
-  moveCursorToSectionFooter: (section) ->
-    editor = @getEditor()
-    headerPos = @moveCursorToSectionHeader(section)
-    console.log(headerPos)
-    range = [headerPos, editor.getEofBufferPosition()]
+  moveCursorToEnd: (editor, position) ->
     footerRegex = _.escapeRegExp(footerString)
-    footerPos = editor.getEofBufferPosition()
-    editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (footerResult) ->
-      footerResult.stop()
-      editor.setCursorBufferPosition(footerResult.range.start)
-      footerPos = footerResult.range.start
-    return footerPos
+    range = [position, editor.getEofBufferPosition()]
+    editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (result) ->
+      result.stop()
+      editor.setCursorBufferPosition(result.range.start)
 
-  addToTodo: -> @moveTodoToBottomOfSection('Backlog')
+  removeTag: (tagIndicator) ->
+    editor = @getEditor()
+    line = @selectCurrentLine(editor)
+    regex = _.escapeRegExp(tagIndicator) + "\\(.*?\\)[ ]?"
+    lineWithoutTag = line.text.replace(new RegExp(regex, 'g'), '')
+    editor.insertText(lineWithoutTag)
+    return true
+
+  addToBacklog: -> @copyTodoToSection('Backlog', 'bottom')
 
   createTodo: ->
-    console.log("Creating todo")
     editor = @getEditor()
-    curLine = editor.getCursorBufferPosition()
-    range = [[0,0], editor.getEofBufferPosition()]
-    headerRegex = _.escapeRegExp(todoHeaderString)
-    editor.scanInBufferRange new RegExp(headerRegex, 'g'), range, (result) ->
-      result.stop()
-      footerRegex = _.escapeRegExp(footerString)
-      range = [result.range.end, editor.getEofBufferPosition()]
-      editor.scanInBufferRange new RegExp(footerRegex, 'g'), range, (footerResult) ->
-        footerResult.stop()
-        editor.setCursorBufferPosition(footerResult.range.start)
-        editor.moveLeft()
-        editor.insertNewline()
-        editor.moveToBeginningOfLine()
-        editor.insertText('  ')
+    @moveCursorToSection(editor, 'Backlog', 'footer')
+    editor.insertNewlineAbove()
     return true
 
   closeTodo: ->
     closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
-    return @moveTodoToTopOfSection("Closed", closedTime)
+    return @moveTodoToSection("Closed", closedTime)
 
   # Create a new note section with boilerplate text in the view supplied
   createNote: (noteTime, todoStr) ->
