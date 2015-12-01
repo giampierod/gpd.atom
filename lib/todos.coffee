@@ -221,7 +221,8 @@ module.exports =
 
   openTodo: ->
     console.log("Open Todo")
-    filename = @getEditor().getBuffer().getUri().replace('.gpd_note','.gpd')
+    filename = @getEditor().getBuffer().getUri().replace(/_note/i,'')
+    console.log(filename)
     return atom.workspace.open(filename)
 
   openNote: ->
@@ -245,7 +246,9 @@ module.exports =
             @createNote(innerNote, todoStrMin)
       else
         editor.moveToEndOfLine()
-        editor.insertText(" `(#{noteTime})")
+        if !editor.getLastCursor().isSurroundedByWhitespace()
+          editor.insertText(" ")
+        editor.insertText("`(#{noteTime})")
         @openNoteFile().then =>
           @createNote(noteTime, todoStr)
     else
