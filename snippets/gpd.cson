@@ -1,10 +1,10 @@
 {
   'license':'Apache 2.0'
   'description': 'All tab combinations for generating GPD todos quickly.'
-  '.source.GPD':{
+  '.source.gpd':{
     'boilerplate':{
       'prefix':'///'
-      'body':'//Today//\n//End//\n\n//Todo//\n    ${1}\n//End//\n\n//Closed//\n//End//'
+      'body':'//Todo//\n//End//\n\n//Backlog//\n    ${1}\n//End//\n\n//Closed//\n//End//'
     }
     'cost':{
       'prefix': '$'

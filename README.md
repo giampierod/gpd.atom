@@ -16,7 +16,7 @@ To install GPD, you first need to install the Atom text editor. Go to the follow
 A few steps and you will be on your way.
 
 1. Create new file, give it the extension `.GPD`, and open it in Atom.
-2. Type `///,Tab`. It will instantly give you the section layouts and put your cursor in the `Todo` section.
+2. Type `///,Tab`. It will instantly give you the section layouts and put your cursor in the `Backlog` section.
 3. Create some Todos. Use symbols to note various aspects of the Todo. For all the symbols available (`#`, `!`, `@`, `$`, `~`, ` ` `) you can type <kbd>symbol</kbd> <kbd>tab</kbd> to enter them. All of the symbols represent different attributes of the Todo:
 	* <kbd>#</kbd> <kbd>tab</kbd> → `#(Project)` - The project or group of work that this Todo is part of.
 	* <kbd>!</kbd> <kbd>tab</kbd> → `!(Target)` - A measurable target for the Todo. E.g.: a date, a specific performance metric, &c.
@@ -29,16 +29,16 @@ A few steps and you will be on your way.
 ### Shortcuts
 Shortcuts make GPD what it is. If you don't learn them it's not really going to work that well.
 
-* <kbd>ctrl</kbd><kbd>?</kbd> - Create a new Todo at the bottom of the ``//Todo//`` section
-* <kbd>ctrl</kbd><kbd>.</kbd> - Move the currently selected Todo to the top of the ``//Today//`` section
+* <kbd>ctrl</kbd><kbd>?</kbd> - Create a new Todo at the bottom of the ``//Backlog//`` section
+* <kbd>ctrl</kbd><kbd>.</kbd> - Move the currently selected Todo to the top of the ``//Todo//`` section
 * <kbd>ctrl</kbd><kbd>}</kbd> - Move the current Todo to the top of ``//Closed//`` section and put a `~(datetime.now)` in front of it
-* <kbd>ctrl</kbd><kbd>{</kbd> - As above, but also copy the Todo to the bottom of the ``//Todo//`` section (for repeat tasks)
+* <kbd>ctrl</kbd><kbd>{</kbd> - As above, but also copy the Todo to the bottom of the ``//Backlog//`` section (for repeat tasks)
 * <kbd>ctrl</kbd><kbd>,</kbd> - Find or create the note for current Todo in a companion `.GPD_Note` file. When in the `.GPD_Note` file, you can press this again to switch back the main `.GPD` file.
-* <kbd>ctrl</kbd><kbd>$</kbd> - (experimental) Start/abort a 25 minute Pomodoro timer. Also appends an `O` to the cost metric field to mark the start of a Pomodoro. If you abort the Pomodoro, the `O` is replaced with a `/`, and if you finish the Pomodoro it is replaced with an `X`.
+* <kbd>ctrl</kbd><kbd>$</kbd> - (experimental) Start or abort a 25 minute Pomodoro timer. Also appends an `O` to the cost metric field to mark the start of a Pomodoro. If you abort the Pomodoro, the `O` is replaced with a `/`, and if you finish the Pomodoro it is replaced with an `X`.
 
 ### Sections
 
-Todos are divided into different sections: **Today**, **Goals**, and **Closed**. These sections are denoted by `//Section Name//` followed by `//End//`. The **Today**, **Todo**, and **Closed** sections are mandatory for this package, but you are free to create any other sections you want.
+Todos are divided into different sections: **Todo**, **Backlog**, and **Closed**. These sections are denoted by `//Section Name//` followed by `//End//`. The **Todo**, **Backlog**, and **Closed** sections are mandatory for this package, but you are free to create any other sections you want.
 
 ---------------
 
