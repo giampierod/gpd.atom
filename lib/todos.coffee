@@ -37,7 +37,7 @@ module.exports =
       minimum: '5'
     dateFormat:
       type: 'string'
-      default: "YYYY-MM-DD hh:mm"
+      default: "DD/MM/YY hh:mm"
 
   activate: (state) ->
     bindings = {
@@ -92,7 +92,7 @@ module.exports =
   doneTodoAndRepeat: ->
     @attempt( ->
       closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
-      @copyTodoToSection('Closed', closedTime)
+      @copyTodoToSection('Closed', null, closedTime)
       @removeTag('$')
       @moveTodoToSection('Backlog', 'bottom')
     )
@@ -109,8 +109,8 @@ module.exports =
     return { 'text': todo, 'position': origPos}
 
   moveTodoToSection: (section, bottom, prefix) ->
-    @copyTodoToSection(section, bottom, prefix)
-    @getEditor().deleteLine()
+    if @copyTodoToSection(section, bottom, prefix)
+      @getEditor().deleteLine()
 
   copyTodoToSection: (section, bottom, prefix) ->
     editor = @getEditor()
@@ -122,6 +122,7 @@ module.exports =
       else
         @moveCursorToSection(editor, section)
       editor.insertNewline()
+      editor.moveToBeginningOfLine()
       editor.insertText(line.text)
       if prefix  # Unless prefix is undefined or empty in any way:
         editor.moveToFirstCharacterOfLine()
@@ -132,6 +133,9 @@ module.exports =
       linesInsertedAbove = if pasteLine.row < line.position.row then 1 else 0
       editor.setCursorBufferPosition([line.position.row + linesInsertedAbove, line.position.column])
       return true
+    else
+      atom.notifications.addError("Headers and footers not allowed to be moved.")
+      return false
 
   moveCursorToSection: (editor, section, footer) ->
     headerRegex = _.escapeRegExp('//' + section + '//')
@@ -168,7 +172,7 @@ module.exports =
 
   closeTodo: ->
     closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
-    return @moveTodoToSection("Closed", closedTime)
+    return @moveTodoToSection("Closed", null, closedTime)
 
   # Create a new note section with boilerplate text in the view supplied
   createNote: (noteTime, todoStr) ->
