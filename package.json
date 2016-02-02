@@ -1,6 +1,6 @@
 {
   "name": "gpd",
-  "version": "0.12.7",
+  "version": "0.13.0",
   "main": "./lib/todos",
   "private": true,
   "description": "GPD productivity system for Atom.",
@@ -28,7 +28,9 @@
       "gpd:toggle-note",
       "gpd:start-timer",
       "gpd:abort-timer",
-      "gpd:toggle-pomodoro"
+      "gpd:toggle-pomodoro",
+      "gpd:narrow-to-section",
+      "gpd:unnarrow"
     ]
   },
   "dependencies": {

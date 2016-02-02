@@ -29,12 +29,15 @@ A few steps and you will be on your way.
 ### Shortcuts
 Shortcuts make GPD what it is. If you don't learn them it's not really going to work that well.
 
-* <kbd>ctrl</kbd><kbd>?</kbd> - Create a new Todo at the bottom of the ``//Backlog//`` section
+* <kbd>ctrl</kbd><kbd>?</kbd> - Create a new Todo at the bottom of the ``//Backlog//`` section. If you are in a gpd_note file, the line you are currently on will be copied as a new note in the gpd file.
 * <kbd>ctrl</kbd><kbd>.</kbd> - Move the currently selected Todo to the top of the ``//Todo//`` section
 * <kbd>ctrl</kbd><kbd>}</kbd> - Move the current Todo to the top of ``//Closed//`` section and put a `~(datetime.now)` in front of it
 * <kbd>ctrl</kbd><kbd>{</kbd> - As above, but also copy the Todo to the bottom of the ``//Backlog//`` section (for repeat tasks)
 * <kbd>ctrl</kbd><kbd>,</kbd> - Find or create the note for current Todo in a companion `.GPD_Note` file. When in the `.GPD_Note` file, you can press this again to switch back the main `.GPD` file.
+* <kbd>ctrl</kbd><kbd>[</kbd> - Narrow the view to a section folding the rest.
+* <kbd>ctrl</kbd><kbd>]</kbd> - Unnarrow. I.e. Unfold-All
 * <kbd>ctrl</kbd><kbd>$</kbd> - (experimental) Start or abort a 25 minute Pomodoro timer. Also appends an `O` to the cost metric field to mark the start of a Pomodoro. If you abort the Pomodoro, the `O` is replaced with a `/`, and if you finish the Pomodoro it is replaced with an `X`.
+
 
 ### Sections
 
