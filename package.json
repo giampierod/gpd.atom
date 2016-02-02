@@ -28,7 +28,9 @@
       "gpd:toggle-note",
       "gpd:start-timer",
       "gpd:abort-timer",
-      "gpd:toggle-pomodoro"
+      "gpd:toggle-pomodoro",
+      "gpd:narrow-to-section",
+      "gpd:unnarrow"
     ]
   },
   "dependencies": {

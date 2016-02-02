@@ -8,7 +8,7 @@ Description:
 ###
 
 _ = require 'underscore-plus'
-{CompositeDisposable, Range} = require 'atom'
+{CompositeDisposable, Range, Point, Fold} = require 'atom'
 {exec, child} = require 'child_process'
 moment = require 'moment'
 PomodoroTimer = require './pomodoro-timer'
@@ -49,6 +49,8 @@ module.exports =
       'gpd:start_timer': => @start()
       'gpd:abort_timer': => @abort()
       'gpd:toggle-pomodoro': => @togglePomodoro()
+      'gpd:narrow-to-section': => @narrowToSection()
+      'gpd:unnarrow': => @unnarrow()
     }
 
     subscriptions = atom.commands.add 'atom-workspace', bindings
@@ -77,6 +79,19 @@ module.exports =
         when 'source.gpd_note' then @openTodo()
         when 'source.gpd' then @openNote()
 
+  narrowToSection: ->
+    editor = @getEditor()
+    scopeName = editor.getGrammar().scopeName
+    if scopeName == 'source.gpd' || scopeName == 'source.gpd_note'
+      editor.transact =>
+        @foldAroundSection()
+
+  unnarrow: ->
+    editor = @getEditor()
+    editor.transact =>
+      editor.unfoldAll()
+      editor.scrollToBufferPosition(editor.getCursorBufferPosition())
+
   attempt: (fn) ->
     editor = @getEditor()
     if editor.getGrammar().scopeName == 'source.gpd'
@@ -87,7 +102,12 @@ module.exports =
 
   doneTodo: -> @attempt(@closeTodo)
 
-  newTodo: -> @attempt(@createTodo)
+  newTodo: ->
+    editor = @getEditor()
+    editor.transact =>
+      switch editor.getGrammar().scopeName
+        when 'source.gpd_note' then @makeTodoFromNoteLine()
+        when 'source.gpd' then @createTodo()
 
   doneTodoAndRepeat: ->
     @attempt( ->
@@ -137,6 +157,24 @@ module.exports =
       atom.notifications.addError("Headers and footers not allowed to be moved.")
       return false
 
+  insertNewTodo: (section, bottom, text) ->
+    editor = @getEditor()
+    if !@isHeader(text)
+      if bottom
+        @moveCursorToSection(editor, section, 'footer')
+        editor.moveLeft()
+      else
+        @moveCursorToSection(editor, section)
+      editor.insertNewline()
+      editor.moveToBeginningOfLine()
+      editor.indentSelectedRows()
+      editor.insertText(text)
+      pasteLine = editor.getCursorBufferPosition()
+      return true
+    else
+      atom.notifications.addError("Headers and footers not allowed to be added as Todos.")
+      return false
+
   moveCursorToSection: (editor, section, footer) ->
     headerRegex = _.escapeRegExp('//' + section + '//')
     moveCursorToEnd = @moveCursorToEnd  # `editor.scan` rebinds `@`
@@ -175,46 +213,77 @@ module.exports =
     return @moveTodoToSection("Closed", null, closedTime)
 
   # Create a new note section with boilerplate text in the view supplied
-  createNote: (noteTime, todoStr) ->
-    noteHeader = "//" + noteTime + "//\n"
-    noteFooter = "//End//\n\n"
+  createNote: (noteHeaderText, todoStr) ->
+    noteHeader = "//" + noteHeaderText + "//\n"
+    noteFooter = "//End//"
     noteBoilerStr = (noteHeader + "  " + todoStr + "\n\n  \n"+ noteFooter)
     editor = @getEditor()
-    editor.unfoldAll()
+    @unhideNotes()
     noteBoilerRange = editor.getBuffer().insert([0,0], noteBoilerStr)
-    @highlightNote([noteBoilerRange.start, noteBoilerRange.end])
-    editor.setCursorBufferPosition([noteBoilerRange.end.row-3, 4])
+    editor.getBuffer().insert(noteBoilerRange.end, "\n\n")
+    return new Range(noteBoilerRange.start, noteBoilerRange.end)
 
-
-
-  # Fold the other notes, and unfold the selected not so the user can focus
-  # on the note they are working on. Assumption that noteRange is an array of
-  # points with noteRange[0] being the start and noteRange[1] being the end.
+  # Fold and 'eventually' hide the other notes, and unfold the selected note so
+  # the user can focus on the note they are working on. NoteRange must be an
+  # actual Range object (no arrays of points or arrays of arrays of coordinates)
+  # TODO: Implement Narrow function into Atom so that I don't have to fold
   highlightNote: (noteRange) ->
     editor = @getEditor()
-    beforeNote = [[0, 0], [noteRange[0].row, 0]]
-    afterNote = [noteRange[1], editor.getBuffer().getEndPosition()]
-    editor.setSelectedBufferRanges([beforeNote, afterNote])
+    eof = editor.getBuffer().getEndPosition()
+    afterNote = [[noteRange.end.row + 1, 0], [eof.row, eof.column]]
+    curPos = editor.getCursorBufferPosition()
+    if noteRange.start.row > 0
+      beforeNote = [[0, 0], [noteRange.start.row - 1, 0]]
+      editor.setSelectedBufferRanges([beforeNote, afterNote])
+    else
+      editor.setSelectedBufferRanges([afterNote])
     editor.foldSelectedLines()
+    editor.setCursorBufferPosition(curPos)
+
+
+  unhideNotes: ->
+    editor = @getEditor()
+    editor.unfoldAll()
+
+
+  foldAroundSection: () ->
+    console.log("foldAroundSection called")
+    headerFoundResult = @findThisHeader()
+    if headerFoundResult.found
+      console.log("Header Found")
+      sectionFoundResult = @getSectionForHeader(headerFoundResult.text)
+      if sectionFoundResult.found
+        console.log("Section Range Found")
+        @highlightNote(sectionFoundResult.range)
 
 
   # Find a note with the given headerText in the view
-  findNoteHeader: (headerText) ->
+  getSectionForHeader: (headerText) ->
     editor = @getEditor()
     me = @
-    found = false
-    editor.unfoldAll()
+    searchResult = {found: false, range: null}
+    @unhideNotes()
     editor.scanInBufferRange new RegExp("//#{headerText}//", 'g'), [[0,0],editor.getEofBufferPosition()], (result) ->
       result.stop()
       editor.scanInBufferRange new RegExp("//End//", 'g'), [result.range.end,editor.getEofBufferPosition()], (footerResult) ->
         footerResult.stop()
-        noteRange = [result.range.start, footerResult.range.end]
-        me.highlightNote(noteRange)
-        editor.setCursorBufferPosition([noteRange[1].row-1, 0])
-        editor.moveToEndOfLine()
-        found = true
-    return found
+        noteRange = new Range(result.range.start, footerResult.range.end)
+        searchResult.found = true
+        searchResult.range = noteRange
+    return searchResult
 
+
+  # Find the header in the current note/section
+  findThisHeader: () ->
+    editor = @getEditor()
+    me = @
+    searchResult = {found: false, text: null}
+    headerRegex = new RegExp("//(.*)//", 'g')
+    editor.backwardsScanInBufferRange headerRegex, [[0,0],editor.getCursorBufferPosition()], (result) ->
+      result.stop()
+      searchResult.found = true
+      searchResult.text = result.match[1]
+    return searchResult
 
   noteExists: (text) ->
     if text.match(noteHeaderPattern) then return noteHeaderPattern.exec(text)[0] else return false
@@ -224,13 +293,31 @@ module.exports =
     return atom.workspace.open(filename)
 
   openTodo: ->
-    console.log("Open Todo")
     filename = @getEditor().getBuffer().getUri().replace(/_note/i,'')
-    console.log(filename)
     return atom.workspace.open(filename)
 
+
+  makeTodoFromNoteLine: ->
+    editor = @getEditor()
+    curPos = editor.getCursorBufferPosition()
+    editor.moveToEndOfLine()
+    endOfLine = editor.getCursorBufferPosition()
+    editor.selectToBeginningOfLine()
+    todoStr = editor.getSelectedText().trim().replace(/^\W/g,"").trim()
+    headerSearchResult = @findThisHeader()
+    if headerSearchResult.found
+      todoStr = todoStr + (" `(#{headerSearchResult.text})")
+    if !@isHeader(todoStr)
+      @openTodo().then =>
+        console.log("Todo Opened")
+        console.log(todoStr)
+        @insertNewTodo("Backlog", "bottom", todoStr)
+    else
+      atom.notifications.addError("Can't create Todo From Header.")
+    editor.setCursorBufferPosition(curPos)
+
+  # Finds the note matching the Todo or creates a new one
   openNote: ->
-    console.log("Open Note")
     editor = @getEditor()
     curPos = editor.getCursorBufferPosition()
     noteTime =  moment().format("YYYY.MM.DD.hh.mm")
@@ -240,21 +327,28 @@ module.exports =
     todoStr = editor.getSelectedText().trim()
     noteText = @noteExists(todoStr)
     if !@isHeader(todoStr)
+      noteRange = new Range(0,0)
       if noteText
         match = noteHeaderPattern.exec(noteText)
         innerNote = match[1]
         todoStrMin = todoStr.replace(match[0], "").trim()
         @openNoteFile().then =>
-          console.log(@findNoteHeader(innerNote))
-          if !@findNoteHeader(innerNote)
-            @createNote(innerNote, todoStrMin)
+          noteSearchResult = @getSectionForHeader(innerNote)
+          if noteSearchResult.found
+            noteRange = noteSearchResult.range
+          else
+            noteRange = @createNote(innerNote, todoStrMin)
+          @highlightNote(noteRange)
+          @getEditor().setCursorBufferPosition([noteRange.end.row-1, Infinity])
       else
         editor.moveToEndOfLine()
         if !editor.getLastCursor().isSurroundedByWhitespace()
           editor.insertText(" ")
         editor.insertText("`(#{noteTime})")
         @openNoteFile().then =>
-          @createNote(noteTime, todoStr)
+          noteRange = @createNote(noteTime, todoStr)
+          @highlightNote(noteRange)
+          @getEditor().setCursorBufferPosition([noteRange.end.row-1, Infinity])
     else
       atom.notifications.addError("No notes allowed for headers.")
     editor.setCursorBufferPosition(curPos)

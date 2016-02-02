@@ -7,3 +7,5 @@
   'ctrl-}':'gpd:done-todo'
   'ctrl-{':'gpd:done-todo-and-repeat'
   'ctrl-$':'gpd:toggle-pomodoro'
+  'ctrl-[':'gpd:narrow-to-section'
+  'ctrl-]':'gpd:unnarrow'
