@@ -23,6 +23,9 @@ playSounds: false
 
 module.exports =
   config:
+    defaultGpdFile:
+      type: 'string'
+      default: "Todo.gpd"
     pomodoroLengthMinutes:
       type: 'integer'
       default: '25'
@@ -52,7 +55,6 @@ module.exports =
       'gpd:narrow-to-section': => @narrowToSection()
       'gpd:unnarrow': => @unnarrow()
     }
-
     subscriptions = atom.commands.add 'atom-workspace', bindings
     @timer = new PomodoroTimer()
     @view = new PomodoroView(@timer)
@@ -60,6 +62,13 @@ module.exports =
     @timer.on 'rest', => @startRest()
     @timer.on 'start', =>
       @pomodoroState = "STARTED"
+    @disposable = atom.workspace.observeTextEditors((editor) ->
+      unless atom.config.settings.gpd?
+        if editor.getGrammar() == 'source.gpd'
+          atom.config.set("gpd.defaultGpdFile", editor.getPath())
+          @removeCallback())
+
+  removeCallback: -> @disposable.dispose()
 
   getEditor: -> atom.workspace.getActiveTextEditor()
 
@@ -105,9 +114,10 @@ module.exports =
   newTodo: ->
     editor = @getEditor()
     editor.transact =>
-      switch editor.getGrammar().scopeName
-        when 'source.gpd_note' then @makeTodoFromNoteLine()
-        when 'source.gpd' then @createTodo()
+      if editor.getGrammar().scopeName == 'source.gpd'
+        @createTodo()
+      else
+        @makeTodoFromNoteLine()
 
   doneTodoAndRepeat: ->
     @attempt( ->
@@ -232,7 +242,7 @@ module.exports =
     eof = editor.getBuffer().getEndPosition()
     afterNote = [[noteRange.end.row + 1, 0], [eof.row, eof.column]]
     curPos = editor.getCursorBufferPosition()
-    if noteRange.start.row > 0
+    if noteRange.start.row > 0 # Don't fold before the note if it is at the top
       beforeNote = [[0, 0], [noteRange.start.row - 1, 0]]
       editor.setSelectedBufferRanges([beforeNote, afterNote])
     else
@@ -247,13 +257,10 @@ module.exports =
 
 
   foldAroundSection: () ->
-    console.log("foldAroundSection called")
     headerFoundResult = @findThisHeader()
     if headerFoundResult.found
-      console.log("Header Found")
       sectionFoundResult = @getSectionForHeader(headerFoundResult.text)
       if sectionFoundResult.found
-        console.log("Section Range Found")
         @highlightNote(sectionFoundResult.range)
 
 
@@ -293,7 +300,11 @@ module.exports =
     return atom.workspace.open(filename)
 
   openTodo: ->
-    filename = @getEditor().getBuffer().getUri().replace(/_note/i,'')
+    filename = atom.config.get('gpd.defaultGpdFile')
+    if @getEditor().getGrammar() == 'source.gpd_note'
+      filename = @getEditor().getBuffer().getUri().replace(/_note/i,'')
+    if filename == null
+      filename = "Todo.gpd"
     return atom.workspace.open(filename)
 
 
@@ -303,14 +314,12 @@ module.exports =
     editor.moveToEndOfLine()
     endOfLine = editor.getCursorBufferPosition()
     editor.selectToBeginningOfLine()
-    todoStr = editor.getSelectedText().trim().replace(/^\W/g,"").trim()
+    todoStr = editor.getSelectedText().trim().replace(/^[-*]/g,"").trim()
     headerSearchResult = @findThisHeader()
     if headerSearchResult.found
       todoStr = todoStr + (" `(#{headerSearchResult.text})")
     if !@isHeader(todoStr)
       @openTodo().then =>
-        console.log("Todo Opened")
-        console.log(todoStr)
         @insertNewTodo("Backlog", "bottom", todoStr)
     else
       atom.notifications.addError("Can't create Todo From Header.")
@@ -328,7 +337,7 @@ module.exports =
     noteText = @noteExists(todoStr)
     if !@isHeader(todoStr)
       noteRange = new Range(0,0)
-      if noteText
+      if noteText # We already have a `() tag on the Todo
         match = noteHeaderPattern.exec(noteText)
         innerNote = match[1]
         todoStrMin = todoStr.replace(match[0], "").trim()
@@ -370,7 +379,7 @@ module.exports =
       todo = todo.replace(/\$\([a-zA-Z0-9_/ ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '$()',
       todo = todo.replace(/\#\([a-zA-Z0-9_\"\., ]*\)[ ]?/g, '') # Strip out the time spent marker, '#()'
       todo = todo.replace(/`\([a-zA-Z0-9_\"\., ]*[\)]?[ ]?/g, '') # Strip out the time spent marker, '`()'
-      todo = todo.replace(/(^\s+|\s+$)/g,'') # Trim()
+      todo = todo.trim()
       atom.notifications.addSuccess("Started: '#{todo}'", {icon: "clock"})
       timerObj.start(todo)
       @todo = todo
@@ -473,3 +482,4 @@ module.exports =
   deactivate: ->
     @view?.destroy()
     @view = null
+    @disposable?.dispose()
