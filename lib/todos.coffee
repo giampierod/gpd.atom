@@ -22,6 +22,7 @@ noteHeaderPattern = /`\(([a-zA-Z0-9_\"\., ]*)\)/
 playSounds: false
 
 module.exports =
+  subscriptions: null
   config:
     defaultGpdFile:
       type: 'string'
@@ -55,18 +56,18 @@ module.exports =
       'gpd:narrow-to-section': => @narrowToSection()
       'gpd:unnarrow': => @unnarrow()
     }
-    subscriptions = atom.commands.add 'atom-workspace', bindings
+    @subscriptions = new CompositeDisposable
+    @subscriptions.add atom.commands.add 'atom-workspace', bindings
     @timer = new PomodoroTimer()
     @view = new PomodoroView(@timer)
     @timer.on 'finished', => @finish()
     @timer.on 'rest', => @startRest()
     @timer.on 'start', =>
       @pomodoroState = "STARTED"
-    @disposable = atom.workspace.observeTextEditors((editor) ->
-      unless atom.config.settings.gpd?
-        if editor.getGrammar() == 'source.gpd'
+    @subscriptions.add atom.workspace.observeTextEditors (editor) ->
+      unless atom.config.settings.gpd == null
+        if editor.getGrammar().scopeName == 'source.gpd'
           atom.config.set("gpd.defaultGpdFile", editor.getPath())
-          @removeCallback())
 
   removeCallback: -> @disposable.dispose()
 
@@ -301,7 +302,8 @@ module.exports =
 
   openTodo: ->
     filename = atom.config.get('gpd.defaultGpdFile')
-    if @getEditor().getGrammar() == 'source.gpd_note'
+    if @getEditor().getGrammar().scopeName == 'source.gpd_note'
+      console.log("In the note")
       filename = @getEditor().getBuffer().getUri().replace(/_note/i,'')
     if filename == null
       filename = "Todo.gpd"
@@ -482,4 +484,4 @@ module.exports =
   deactivate: ->
     @view?.destroy()
     @view = null
-    @disposable?.dispose()
+    @subscriptions.dispose()
