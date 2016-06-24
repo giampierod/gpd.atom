@@ -19,7 +19,7 @@ A few steps and you will be on your way.
 2. Type `///,Tab`. It will instantly give you the section layouts and put your cursor in the `Backlog` section.
 3. Create some Todos. Use symbols to note various aspects of the Todo. For all the symbols available (`#`, `!`, `@`, `$`, `~`, ` ` `) you can type <kbd>symbol</kbd> <kbd>tab</kbd> to enter them. All of the symbols represent different attributes of the Todo:
 	* <kbd>#</kbd> <kbd>tab</kbd> → `#(Project)` - The project or group of work that this Todo is part of.
-	* <kbd>!</kbd> <kbd>tab</kbd> → `!(Target)` - A measurable target for the Todo. E.g.: a date, a specific performance metric, &c.
+	* <kbd>!</kbd> <kbd>tab</kbd> → `!(Target)` - A measurable target for the Todo. E.g.: a date, a specific performance metric, etc.
 	* <kbd>@</kbd> <kbd>tab</kbd> → `@(Context)` - People, places, or things that are related or required for the Todo. E.g.: a meeting room, a person who you are waiting for.
 	* <kbd>$</kbd> <kbd>tab</kbd> → `$(Cost)` - The amount of time or other cost metric that should be accounted for this Todo.
 	* <kbd>~</kbd> <kbd>tab</kbd> → `~(Completion Date)` - The date that you finished the Todo.
