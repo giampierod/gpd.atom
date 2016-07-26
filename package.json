@@ -1,6 +1,6 @@
 {
   "name": "gpd",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "main": "./lib/todos",
   "private": true,
   "description": "GPD productivity system for Atom.",
