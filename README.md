@@ -16,7 +16,7 @@ To install GPD, you first need to install the Atom text editor. Go to the follow
 A few steps and you will be on your way.
 
 1. Create new file, give it the extension `.GPD`, and open it in Atom.
-2. Type `///,Tab`. It will instantly give you the section layouts and put your cursor in the `Backlog` section.
+2. Type <kbd>/</kbd> <kbd>/</kbd> <kbd>/</kbd> <kbd>Tab</kbd>. It will instantly give you the section layouts and put your cursor in the `Backlog` section.
 3. Create some Todos. Use symbols to note various aspects of the Todo. For all the symbols available (`#`, `!`, `@`, `$`, `~`, ` ` `) you can type <kbd>symbol</kbd> <kbd>tab</kbd> to enter them. All of the symbols represent different attributes of the Todo:
 	* <kbd>#</kbd> <kbd>tab</kbd> → `#(Project)` - The project or group of work that this Todo is part of.
 	* <kbd>!</kbd> <kbd>tab</kbd> → `!(Target)` - A measurable target for the Todo. E.g.: a date, a specific performance metric, etc.

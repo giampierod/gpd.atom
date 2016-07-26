@@ -25,6 +25,7 @@
       "gpd:select-todo",
       "gpd:done-todo",
       "gpd:done-todo-and-repeat",
+      "gpd:open-and-find-note",
       "gpd:toggle-note",
       "gpd:start-timer",
       "gpd:abort-timer",

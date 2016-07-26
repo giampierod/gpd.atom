@@ -49,6 +49,7 @@ module.exports =
       'gpd:select-todo': => @selectTodo()
       'gpd:done-todo': => @doneTodo()
       'gpd:done-todo-and-repeat': => @doneTodoAndRepeat()
+      'gpd:open-and-find-note': => @openAndFindNote()
       'gpd:toggle-note': => @toggleNote()
       'gpd:start_timer': => @start()
       'gpd:abort_timer': => @abort()
@@ -89,6 +90,9 @@ module.exports =
         when 'source.gpd_note' then @openTodo()
         when 'source.gpd' then @openNote()
 
+  openAndFindNote: -> @attempt(@openNoteAndSearch)
+
+
   narrowToSection: ->
     editor = @getEditor()
     scopeName = editor.getGrammar().scopeName
@@ -127,6 +131,24 @@ module.exports =
       @removeTag('$')
       @moveTodoToSection('Backlog', 'bottom')
     )
+
+  openNoteAndSearch: ->
+    editor = @getEditor()
+    selectedText = editor.getSelectedText()
+    console.log(selectedText)
+    @openNote()
+    editor = @getEditor()
+    header = @findThisHeader()
+    if selectedText.length > 0
+      console.log("Length greater than 0")
+      @moveCursorToSection(editor, header)
+      escapedText = _.escapeRegExp(selectedText)
+      editor.scan new RegExp(escapedText, 'g'), (result) ->
+        console.log("Found it")
+        result.stop()
+        console.log(result)
+        editor.setCursorBufferPosition(result.computedRange.start)
+
 
   isHeader: (text) ->
     headerPattern = new RegExp('//(.*)//')
@@ -312,20 +334,29 @@ module.exports =
 
   makeTodoFromNoteLine: ->
     editor = @getEditor()
-    curPos = editor.getCursorBufferPosition()
-    editor.moveToEndOfLine()
-    endOfLine = editor.getCursorBufferPosition()
-    editor.selectToBeginningOfLine()
-    todoStr = editor.getSelectedText().trim().replace(/^[-*]/g,"").trim()
+    selectedText = editor.getSelectedText()
+    # Single Line?
+    if selectedText.length == 0
+      curPos = editor.getCursorBufferPosition()
+      editor.moveToEndOfLine()
+      endOfLine = editor.getCursorBufferPosition()
+      editor.selectToBeginningOfLine()
+    lines = editor.getSelectedText().split("\n")
     headerSearchResult = @findThisHeader()
-    if headerSearchResult.found
-      todoStr = todoStr + (" `(#{headerSearchResult.text})")
-    if !@isHeader(todoStr)
-      @openTodo().then =>
-        @insertNewTodo("Backlog", "bottom", todoStr)
-    else
-      atom.notifications.addError("Can't create Todo From Header.")
-    editor.setCursorBufferPosition(curPos)
+    @openTodo().then =>
+      for line in lines
+        todoStr = line.trim().replace(/^[-*]/g,"").trim()
+        if todoStr.length > 0
+          if headerSearchResult.found
+            todoStr = todoStr + (" `(#{headerSearchResult.text})")
+          if !@isHeader(todoStr)
+            @insertNewTodo("Backlog", "bottom", todoStr)
+          else
+            atom.notifications.addError("Can't create Todo From Header.")
+
+
+
+
 
   # Finds the note matching the Todo or creates a new one
   openNote: ->
