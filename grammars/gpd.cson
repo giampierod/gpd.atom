@@ -7,8 +7,8 @@
   'gpd',
   'GPD'
 ]
-'foldingStartMarker':'//(?!End)[\\w\\d\\s]*//'
-'foldingStopMarker': '//End//'
+'foldingStartMarker':'^//(?!End)[\\w\\d\\s]*//'
+'foldingStopMarker': '^//End//'
 'patterns': [
   {
     'begin': '#\\('
@@ -23,7 +23,7 @@
   {
     'begin': '!\\('
     'end': '\\)'
-    'name': 'variable.parameter'
+    'name': 'variable'
   }
   {
     'begin':'~\\('

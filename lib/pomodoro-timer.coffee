@@ -10,17 +10,19 @@ class PomodoroTimer extends events.EventEmitter
     @ticktack = new Audio(require("../resources/ticktack").data())
     @bell = new Audio(require("../resources/bell").data())
     @funk = new Audio(require("../resources/funk").data())
-    @ticktack.addEventListener('timeupdate', @loop, false)
+    @ticktack.addEventListener('ended', @loop, false)
     @successCount = 0
 
   # With a tick tock timer on a loop, it needs to be a little more seamless than
   # your average html5 audio element .loop() method.
   # Thus reinventing the wheel is necessary here.
   loop: ->
-    buffer = .27 # Magic number found by playing and listening.
-    if this.currentTime > this.duration - buffer
-      this.currentTime = 0
-      this.play()
+    this.currentTime = 0
+    this.play()
+    # buffer = .2 # Magic number found by playing and listening.
+    # if this.currentTime > this.duration - buffer
+    #   this.currentTime = 0
+    #   this.play()
 
 
   start: (text) ->

@@ -8,8 +8,8 @@
   'gpd_note',
   'GPD_Note'
 ]
-'foldingStartMarker':'//(?!End)[\\w\\s\\d\\.]*//'
-'foldingStopMarker': '//End//'
+'foldingStartMarker':'^//(?!End)[\\w\\d\\s]*//'
+'foldingStopMarker': '^//End//'
 'patterns': [
   {
     'begin': '#\\('
@@ -42,7 +42,7 @@
     'name':'comment'
   }
   {
-    'begin':'//'
+    'begin':'^//'
     'end':'//'
     'name':'comment'
   }

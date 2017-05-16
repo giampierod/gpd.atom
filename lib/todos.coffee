@@ -512,7 +512,7 @@ module.exports =
           console.log stderr
         console.log stdout
 
-  deactivate: ->
+  destroy: ->
     @view?.destroy()
     @view = null
     @subscriptions.dispose()
