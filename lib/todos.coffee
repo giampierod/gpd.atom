@@ -70,7 +70,7 @@ module.exports =
         if editor.getGrammar().scopeName == 'source.gpd'
           atom.config.set("gpd.defaultGpdFile", editor.getPath())
 
-  removeCallback: -> @disposable.dispose()
+  removeCallback: -> @subscriptions.dispose()
 
   getEditor: -> atom.workspace.getActiveTextEditor()
 
@@ -512,7 +512,7 @@ module.exports =
           console.log stderr
         console.log stdout
 
-  destroy: ->
+  deactivate: ->
     @view?.destroy()
     @view = null
     @subscriptions.dispose()

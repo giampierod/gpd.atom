@@ -1,5 +1,3 @@
-'license':'Apache 2.0'
-'description': 'Shortcut key combinations for all commands for gpd.atom.'
 'atom-workspace':
   'ctrl-?':'gpd:new-todo'
   'ctrl-.':'gpd:select-todo'
