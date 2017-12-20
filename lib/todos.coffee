@@ -110,7 +110,8 @@ module.exports =
     editor = @getEditor()
     if editor.getGrammar().scopeName == 'source.gpd'
       editor.transact =>
-        if !fn.call(@) then editor.abortTransaction()
+        fn.call(@)
+
 
   selectTodo: -> @attempt(-> @moveTodoToSection 'Todo')
 
@@ -129,7 +130,7 @@ module.exports =
       closedTime = ("~(#{moment().format(atom.config.get('gpd.dateFormat'))}) ")
       @copyTodoToSection('Closed', null, closedTime)
       @removeTag('$')
-      @moveTodoToSection('Backlog', 'bottom')
+      return @moveTodoToSection('Backlog', 'bottom')
     )
 
   openNoteAndSearch: ->
@@ -174,8 +175,10 @@ module.exports =
         editor.moveLeft()
       else
         @moveCursorToSection(editor, section)
+      editor.getCursorBufferPosition()
       editor.insertNewline()
       editor.moveToBeginningOfLine()
+      editor.getCursorBufferPosition()
       editor.insertText(line.text)
       if prefix  # Unless prefix is undefined or empty in any way:
         editor.moveToFirstCharacterOfLine()
@@ -198,6 +201,7 @@ module.exports =
         editor.moveLeft()
       else
         @moveCursorToSection(editor, section)
+      console.log(editor.getCursorBufferPosition())
       editor.insertNewline()
       editor.moveToBeginningOfLine()
       editor.indentSelectedRows()
